@@ -1,0 +1,26 @@
+# UFL input for the biharmonic equation
+# ==================================
+
+element = FiniteElement("Lagrange", triangle, 2)
+
+# Trial and test functions
+u = TrialFunction(element)
+v = TestFunction(element)
+f = Coefficient(element)
+
+# Normal component, mesh size and right-hand side
+n = FacetNormal(triangle)
+h = CellDiameter(triangle)
+h_avg = (h('+') + h('-'))/2
+
+# Parameters
+alpha = Coefficient(FiniteElement("Real", triangle, 0))
+
+# Bilinear form
+a = inner(div(grad(u)), div(grad(v)))*dx \
+  - inner(avg(div(grad(u))), jump(grad(v), n))*dS \
+  - inner(jump(grad(u), n), avg(div(grad(v))))*dS \
+  + alpha/h_avg*inner(jump(grad(u), n), jump(grad(v),n))*dS
+
+# Linear form
+L = f*v*dx
