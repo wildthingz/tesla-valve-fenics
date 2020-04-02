@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/hatef/Documents/learn/fenics/tesla-valve-fenics/mshr-test/main.cpp
+dolfin.h
+-
+mshr.h
+-
+iostream
+-
+mpi.h
+-
+

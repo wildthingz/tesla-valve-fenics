@@ -7,19 +7,20 @@ using namespace dolfin;
 class Source : public Expression
 {
 public:
-
-    void eval(Array<double>& values, const Array<double>& x) const
+    void eval(Array<double> &values, const Array<double> &x) const
     {
-    values[0] = 4.0*std::pow(DOLFIN_PI, 4)*
-        std::sin(DOLFIN_PI*x[0])*std::sin(DOLFIN_PI*x[1]);
+        values[0] = 4.0 * std::pow(DOLFIN_PI, 4) *
+                    std::sin(DOLFIN_PI * x[0]) * std::sin(DOLFIN_PI * x[1]);
     }
 };
 
 // Sub domain for Dirichlet boundary condition
 class DirichletBoundary : public SubDomain
 {
-    bool inside(const Array<double>& x, bool on_boundary) const
-    { return on_boundary; }
+    bool inside(const Array<double> &x, bool on_boundary) const
+    {
+        return on_boundary;
+    }
 };
 
 int main()
@@ -45,7 +46,8 @@ int main()
     // Define variational problem
     biharmonic::BilinearForm a(V, V);
     biharmonic::LinearForm L(V);
-    a.alpha = alpha; L.f = f;  
+    a.alpha = alpha;
+    L.f = f;
 
     // Compute solution
     Function u(V);
