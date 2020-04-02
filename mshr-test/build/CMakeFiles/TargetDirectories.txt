@@ -1,3 +1,0 @@
-/home/hatef/Documents/learn/fenics/tesla-valve-fenics/mshr-test/build/CMakeFiles/rebuild_cache.dir
-/home/hatef/Documents/learn/fenics/tesla-valve-fenics/mshr-test/build/CMakeFiles/mshr-test.dir
-/home/hatef/Documents/learn/fenics/tesla-valve-fenics/mshr-test/build/CMakeFiles/edit_cache.dir
