@@ -39,8 +39,11 @@ q = TestFunction(Q)
 #Last number refers to the surface number in gmsh, see file attached
 bcp_inflow = DirichletBC(Q, Constant(8), boundaries, 1)
 bcp_outflow = DirichletBC(Q, Constant(0), boundaries, 2)
+#top and bottom boundaries conditions are defined equals with surface number 3
 top_bottom_boundaries = DirichletBC(V, Constant((0, 0)), boundaries, 3)
+#Inner cylinder is surface numer 4
 cylinder_boundaries = DirichletBC(V, Constant((0, 0)), boundaries, 4)
+
 bcu = [cylinder_boundaries, top_bottom_boundaries]
 bcp = [bcp_inflow, bcp_outflow]
 
