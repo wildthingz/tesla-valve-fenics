@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 from fenics import *
 import numpy as np
-# from dolfin import *
-# from mshr import *
 import time
 
 T = 1.0             # final time
@@ -62,12 +60,17 @@ mu = Constant(mu)
 rho = Constant(rho)
 
 # Define strain-rate tensor
+
+
 def epsilon(u):
     return sym(nabla_grad(u))
 
 # Define stress tensor
+
+
 def sigma(u, p):
     return 2*mu*epsilon(u) - p*Identity(len(u))
+
 
 # Define variational problem for step 1
 F1 = rho*dot((u - u_n) / k, v)*dx + \

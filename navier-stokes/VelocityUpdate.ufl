@@ -1,0 +1,20 @@
+# Define elemets
+cell = triangle
+
+vElem = VectorElement("P", cell, 2)
+fElem = FiniteElement("P", cell, 1)
+rElem = FiniteElement("Real", cell, 0)
+
+# Define trial and test functions
+u = TrialFunction(vElem)
+v = TestFunction(vElem)
+
+# Define coefficients
+k  = Coefficient(rElem)
+u_ = Coefficient(vElem)
+p_ = Coefficient(fElem)
+p_n = Coefficient(fElem)
+
+# Define bilinear and linear forms
+a = dot(u, v)*dx
+L = dot(u_, v)*dx - k*dot(nabla_grad(p_ - p_n), v)*dx

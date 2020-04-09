@@ -14,7 +14,6 @@ project(${PROJECT_NAME})
 # Get DOLFIN configuration data (DOLFINConfig.cmake must be in
 # DOLFIN_CMAKE_CONFIG_PATH)
 find_package(DOLFIN REQUIRED)
-# find_package(petsc REQUIRED)
 
 include(${DOLFIN_USE_FILE})
 
