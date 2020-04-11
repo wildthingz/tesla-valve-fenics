@@ -14,6 +14,7 @@ Translating the python version to C++
 - The results are the same.
 - In order to run in parallel, ones needs to compile the in following order:
   - `hdf5-openmpi`/`hdf5`
+  - `hypre`
   - `scotch`
   - `mumps`
   - `petsc`
