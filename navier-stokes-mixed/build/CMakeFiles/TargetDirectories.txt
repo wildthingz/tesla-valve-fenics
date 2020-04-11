@@ -1,3 +1,0 @@
-/home/hatef/Documents/learn/fenics/tesla-valve-fenics/check-solver-options/build/CMakeFiles/rebuild_cache.dir
-/home/hatef/Documents/learn/fenics/tesla-valve-fenics/check-solver-options/build/CMakeFiles/navier-stokes.dir
-/home/hatef/Documents/learn/fenics/tesla-valve-fenics/check-solver-options/build/CMakeFiles/edit_cache.dir
