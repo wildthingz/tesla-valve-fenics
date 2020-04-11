@@ -28,4 +28,6 @@ mkdir build && cd build && cmake .. && make && cd ..
 
 ## make results folder and run the executable
 mkdir results && cd results
-../build/$PROJECT_NAME
+echo "localhost slots=10" > hostfile
+export OMP_NUM_THREADS=1
+mpirun --hostfile hostfile -n 5 ../build/$PROJECT_NAME

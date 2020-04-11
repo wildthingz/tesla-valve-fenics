@@ -11,4 +11,11 @@ Translating the python version to C++
 - I used [this](https://fenicsproject.discourse.group/t/transitioning-from-mesh-xml-to-mesh-xdmf-from-dolfin-convert-to-meshio/412/110) and [this](https://fenicsproject.discourse.group/t/load-marked-mesh-in-cpp-for-parallel-running/2318) with slight modifications to convert the mesh and read it in the c++ file.
 - In order to run in parallel you need you compile `dolfin` with MPI configured `hdf5` libraries. I did this by installing a package called `hdf5-openmpi` and then compiling `dolfin` again.
 - The simulation is now significantly faster.
-- The results looks similar, and max velocity is around the same order of magnitude. However, there are some ripples near the boundries.
+- The results are the same.
+- In order to run in parallel, ones needs to compile the in following order:
+  - `hdf5-openmpi`/`hdf5`
+  - `scotch`
+  - `mumps`
+  - `petsc`
+  - `dolfin`
+- run `mpirun -n <num_threads> <file_name>`

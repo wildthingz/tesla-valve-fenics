@@ -40,6 +40,6 @@ target_link_libraries(${PROJECT_NAME} dolfin)
 target_link_libraries(${PROJECT_NAME} mshr)
 
 # Test targets
-set(test_parameters -np 3 ${MPIEXEC_PARAMS} "./${PROJECT_NAME}")
+set(test_parameters -np 6 ${MPIEXEC_PARAMS} "./${PROJECT_NAME}")
 add_test(NAME ${PROJECT_NAME}_mpi COMMAND "mpirun" ${test_parameters})
 # add_test(NAME ${PROJECT_NAME}_serial COMMAND ${PROJECT_NAME})

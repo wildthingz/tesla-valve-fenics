@@ -12,7 +12,7 @@ int main()
 
     // Set parameter values
     double dt = 0.01;
-    double T = 1;
+    double T = 0.3;
     double mu = 25;
     double rho = 1;
 
@@ -44,7 +44,7 @@ int main()
     DirichletBC cylinder(V, zero_vec, boundaries, 4);
 
     std::vector<DirichletBC *> bcu = {&cylinder, &noslip};
-    std::vector<DirichletBC *> bcp = {{&inflow, &outflow}};
+    std::vector<DirichletBC *> bcp = {&inflow, &outflow};
 
     // Create functions
     auto u_ = std::make_shared<Function>(V);
@@ -100,7 +100,7 @@ int main()
     File ufile("../results/velocity.pvd");
 
     // Time-stepping
-    double t = dt;
+    double t = 0;
     while (t < T + DOLFIN_EPS)
     {
         // Compute tentative velocity step
@@ -114,18 +114,17 @@ int main()
         for (std::size_t i = 0; i < bcp.size(); i++)
         {
             bcp[i]->apply(A2, b2);
-            bcp[i]->apply(*p_->vector());
+            // bcp[i]->apply(*p_->vector());
         }
         solve(A2, *p_->vector(), b2, "bicgstab", prec);
 
         // Velocity correction
         assemble(b3, L3);
-        for (std::size_t i = 0; i < bcu.size(); i++)
-            bcu[i]->apply(A3, b3);
         solve(A3, *u_->vector(), b3, "gmres", "default");
 
         // Move to next time step
         *u_n = *u_;
+        *p_n = *p_;
         t += dt;
 
         cout << "t: " << t << endl;
