@@ -10,7 +10,7 @@ sed -i "s/\(set[(]PROJECT_NAME \)\(.*\)\([)]\)/\1 $PROJECT_NAME\3/g" CMakeLists.
 
 ## if -c is provided compile the ufl file
 [ "$1" == "-c" ] &&
-ffc -l dolfin $PROJECT_NAME.ufl
+ffc -l dolfin *.ufl
 
 ## if -c is provided delete the old build folder
 [ "$1" == "-c" ] &&
@@ -28,8 +28,6 @@ mkdir build && cd build && cmake .. && make && cd ..
 
 ## make results folder and run the executable
 mkdir results && cd results
-../build/$PROJECT_NAME
-
-## use view.py (needs vtk)
-# [ ! -x "../view.py" ] && chmod +x view.py
-# ../view.py "./${PROJECT_NAME}000000.vtu"
+echo "localhost slots=10" > hostfile
+export OMP_NUM_THREADS=1
+mpirun --hostfile hostfile -n 5 ../build/$PROJECT_NAME
