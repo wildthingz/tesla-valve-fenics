@@ -2,7 +2,7 @@
 # to compile and run: ./run.sh -c
 # to just run       : ./run.sh
 
-PROJECT_NAME="navier-stokes"
+PROJECT_NAME="IPCS-benchmark"
 
 ## if -c is provided change the project in cmakelists to $PROJECT_NAME
 [ "$1" == "-c" ] &&
@@ -30,4 +30,4 @@ mkdir build && cd build && cmake .. && make && cd ..
 mkdir results && cd results
 echo "localhost slots=10" > hostfile
 export OMP_NUM_THREADS=1
-mpirun --hostfile hostfile -n 5 ../build/$PROJECT_NAME
+mpirun --hostfile hostfile -n 6 ../build/$PROJECT_NAME

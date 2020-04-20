@@ -2,7 +2,7 @@
 
 using namespace dolfin;
 
-int main()
+void check_solver()
 {
     std::string krylov_method;
 
@@ -37,7 +37,12 @@ int main()
         exit(0);
     }
 
-    std::cout << krylov_method << std::endl;
+    std::cout << "SOLVER OK!" << std::endl;
+}
 
+int main()
+{
+
+    check_solver();
     return 0;
 }

@@ -1,4 +1,5 @@
-# Define elemets
+# pylint: disable-all
+# Define elements
 cell = triangle
 
 vElem = VectorElement("P", cell, 2)
@@ -6,15 +7,15 @@ fElem = FiniteElement("P", cell, 1)
 rElem = FiniteElement("Real", cell, 0)
 
 # Define trial and test functions
-u = TrialFunction(vElem)
-v = TestFunction(vElem)
+p = TrialFunction(fElem)
+q = TestFunction(fElem)
 
 # Define coefficients
 k  = Coefficient(rElem)
 u_ = Coefficient(vElem)
-p_ = Coefficient(fElem)
 p_n = Coefficient(fElem)
 
 # Define bilinear and linear forms
-a = dot(u, v)*dx
-L = dot(u_, v)*dx - k*dot(nabla_grad(p_ - p_n), v)*dx
+a = dot(nabla_grad(p), nabla_grad(q))*dx
+L = dot(nabla_grad(p_n), nabla_grad(q))*dx - \
+    (1/k)*div(u_)*q*dx

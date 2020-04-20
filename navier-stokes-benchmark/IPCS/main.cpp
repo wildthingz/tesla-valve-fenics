@@ -5,15 +5,30 @@
 
 using namespace dolfin;
 
+// inlet
+class InflowVelocity : public Expression
+{
+public:
+    // Constructor
+    InflowVelocity() : Expression(2) {}
+
+    // Evaluate velocity at inflow
+    void eval(Array<double> &values, const Array<double> &x) const
+    {
+        values[0] = 4 * 1.5 * (x[1] * (0.41 - x[1])) / (0.41 * 0.41);
+        values[1] = 0;
+    }
+};
+
 int main()
 {
     // Print log messages only from the root process in parallel
     parameters["std_out_all_processes"] = false;
 
     // Set parameter values
-    double dt = 0.01;
-    double T = 0.3;
-    double mu = 25;
+    double dt = 0.001;
+    double T = 5;
+    double mu = 0.001;
     double rho = 1;
 
     // Load mesh from file
@@ -21,30 +36,31 @@ int main()
     // MeshFunction<std::size_t> boundaries(mesh, "../mesh/cylinder_facet_region.xml");
 
     auto mesh = std::make_shared<Mesh>();
-    XDMFFile initialmeshfile(MPI_COMM_WORLD, "../mesh/mesh.xdmf");
+    XDMFFile initialmeshfile(MPI_COMM_WORLD, "../../mesh/domain.xdmf");
     initialmeshfile.read(*mesh);
 
     MeshValueCollection<std::size_t> mf_mvc(mesh, 2);
-    XDMFFile initialmffile(MPI_COMM_WORLD, "../mesh/mf.xdmf");
-    initialmffile.read(mf_mvc, "name_to_read");
+    XDMFFile initialmffile(MPI_COMM_WORLD, "../../mesh/boundaries.xdmf");
+    initialmffile.read(mf_mvc, "boundaries");
     auto boundaries = std::make_shared<MeshFunction<std::size_t>>(mesh, mf_mvc);
 
     auto V = std::make_shared<VelocityUpdate::FunctionSpace>(mesh);
     auto Q = std::make_shared<PressureUpdate::FunctionSpace>(mesh);
 
     // Create boundary conditions
-    auto p_in = std::make_shared<Constant>(8.0);
+    // auto p_in = std::make_shared<Constant>(8.0);
+    auto v_in = std::make_shared<InflowVelocity>();
     auto p_out = std::make_shared<Constant>(0.0);
     auto zero_vec = std::make_shared<Constant>(0.0, 0.0);
 
-    DirichletBC inflow(Q, p_in, boundaries, 1);
+    DirichletBC inflow(V, v_in, boundaries, 1);
     DirichletBC outflow(Q, p_out, boundaries, 2);
 
     DirichletBC noslip(V, zero_vec, boundaries, 3);
     DirichletBC cylinder(V, zero_vec, boundaries, 4);
 
-    std::vector<DirichletBC *> bcu = {&cylinder, &noslip};
-    std::vector<DirichletBC *> bcp = {&inflow, &outflow};
+    std::vector<DirichletBC *> bcu = {&cylinder, &noslip, &inflow};
+    std::vector<DirichletBC *> bcp = {&outflow};
 
     // Create functions
     auto u_ = std::make_shared<Function>(V);
@@ -93,21 +109,25 @@ int main()
     // Create vectors
     Vector b1, b2, b3;
 
-    // Use amg preconditioner if available
-    const std::string prec(has_krylov_solver_preconditioner("amg") ? "amg" : "default");
-
     // Create files for storing solution
-    File ufile("../results/velocity.pvd");
+    // XDMFFile file_v(MPI_COMM_WORLD, "../results/velocity.xdmf");
+    // file_v.write_checkpoint(*u_, "velocity", 0, XDMFFile::Encoding::HDF5, false);
+    File file("velocity.pvd");
 
     // Time-stepping
     double t = 0;
+    int count = 0;
+    int save_every = 50;
     while (t < T + DOLFIN_EPS)
     {
         // Compute tentative velocity step
         assemble(b1, L1);
         for (std::size_t i = 0; i < bcu.size(); i++)
+        {
             bcu[i]->apply(A1, b1);
-        solve(A1, *u_->vector(), b1, "gmres", "default");
+        }
+
+        solve(A1, *u_->vector(), b1, "bicgstab", "hypre_amg");
 
         // Pressure correction
         assemble(b2, L2);
@@ -116,21 +136,32 @@ int main()
             bcp[i]->apply(A2, b2);
             // bcp[i]->apply(*p_->vector());
         }
-        solve(A2, *p_->vector(), b2, "bicgstab", prec);
+        solve(A2, *p_->vector(), b2, "bicgstab", "hypre_amg");
 
         // Velocity correction
         assemble(b3, L3);
-        solve(A3, *u_->vector(), b3, "gmres", "default");
+        for (std::size_t i = 0; i < bcu.size(); i++)
+        {
+            bcu[i]->apply(A3, b3);
+        }
+
+        solve(A3, *u_->vector(), b3, "cg", "sor");
+
+        // Save to file
+        if (count % save_every == 0)
+        {
+            // file_v.write_checkpoint(*u_, "velocity", t, XDMFFile::Encoding::HDF5, true);
+            file << *u_;
+        }
+
+        cout << "t: " << t << endl;
+        // cout << "u_max: " << (*u_->vector()).max() << endl;
 
         // Move to next time step
         *u_n = *u_;
         *p_n = *p_;
         t += dt;
-
-        cout << "t: " << t << endl;
+        count++;
     }
-
-    // Save to file
-    ufile << *u_n;
     return 0;
 }

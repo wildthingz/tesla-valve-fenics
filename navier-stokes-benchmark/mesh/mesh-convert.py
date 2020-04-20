@@ -2,7 +2,7 @@
 
 import meshio
 import numpy as np
-mesh = meshio.read("cylinder.msh")
+mesh = meshio.read("ns-bench.msh")
 
 line_cells = []
 for cell in mesh.cells:
@@ -27,7 +27,7 @@ for key in mesh.cell_data_dict["gmsh:physical"].keys():
 triangle_mesh = meshio.Mesh(points=mesh.points[:,:2], cells={"triangle": triangle_cells})
 line_mesh =meshio.Mesh(points=mesh.points[:,:2],
                            cells=[("line", line_cells)],
-                           cell_data={"name_to_read":[line_data]})
-meshio.write("mesh.xdmf", triangle_mesh)
+                           cell_data={"boundaries":[line_data]})
+meshio.xdmf.write("domain.xdmf", triangle_mesh)
 
-meshio.xdmf.write("mf.xdmf", line_mesh)
+meshio.xdmf.write("boundaries.xdmf", line_mesh)
