@@ -1,0 +1,3 @@
+# Mixed formulation
+
+## Introduction
