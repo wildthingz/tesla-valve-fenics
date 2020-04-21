@@ -1,0 +1,25 @@
+# pylint: disable-all
+# Define elements
+cell = triangle
+
+vElem = VectorElement("P", cell, 2)
+fElem = FiniteElement("P", cell, 1)
+rElem = FiniteElement("Real", cell, 0)
+
+# Define trial and test functions
+u = TrialFunction(vElem)
+v = TestFunction(vElem)
+
+# Define coefficients
+u_n = Coefficient(vElem)
+f  = Coefficient(vElem)
+k = Coefficient(rElem)
+mu = Coefficient(rElem)
+rho = Coefficient(rElem)
+
+# Define bilinear and linear forms
+eq = rho*inner((u - u_n)/k, v)*dx + inner(grad(u_n)*u_n, v)*dx + \
+    mu*inner(grad(u), grad(v))*dx - inner(f, v)*dx
+
+a = lhs(eq)
+L = rhs(eq)
