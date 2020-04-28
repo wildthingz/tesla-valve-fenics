@@ -17,6 +17,15 @@ In order to run in parallel, ones needs to compile the in following order:
 - `petsc`
 - `dolfin`
 
+tested on:
+
+- `hdf5-openmpi`: 1.10.5
+- `hypre`       : 2.18.2
+- `scotch`      : 6.0.9
+- `mumps`       : 5.3.1
+- `petsc`       : 3.13.0
+- `dolfin`      : 2019.1.0.post0
+
 ## Creating mesh
 
 - Create 2D geometry in gmesh OR Create 3D geometry in OnShape, export as `.step` and import to gmesh.
