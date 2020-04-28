@@ -12,8 +12,8 @@ rElem = FiniteElement("Real", cell, 0)
 w = Coefficient(thElem)
 u, p = split(w)
 (v, q) = TestFunctions(thElem)
-w_ = Coefficient(thElem)
-u0, p0 = split(w_)
+w0 = Coefficient(thElem)
+u0, p0 = split(w0)
 
 # Define coefficients
 f = Coefficient(vElem)

@@ -24,7 +24,7 @@ int main()
     parameters["std_out_all_processes"] = false;
 
     // Set parameter values
-    double dt = 0.05;
+    double dt = 0.001;
     double T = 5;
     double mu = 0.001;
     double rho = 1;
@@ -64,7 +64,7 @@ int main()
     auto J = std::make_shared<NonlinearNS::JacobianForm>(W, W);
 
     // Create functions
-    auto w_ = std::make_shared<Function>(W);
+    auto w0 = std::make_shared<Function>(W);
     auto w = std::make_shared<Function>(W);
 
     // Create coefficients
@@ -74,8 +74,8 @@ int main()
     auto theta_c = std::make_shared<Constant>(theta);
 
     // Set coefficients
-    std::map<std::string, std::shared_ptr<const GenericFunction>> coefficients = 
-        {{"w", w}, {"w_", w_}, {"k", k}, {"nu", nu}, {"theta", theta_c}};
+    std::map<std::string, std::shared_ptr<const GenericFunction>> coefficients =
+        {{"w", w}, {"w0", w0}, {"k", k}, {"nu", nu}, {"theta", theta_c}};
     J->set_coefficients(coefficients);
     coefficients.insert({"f", f});
     F->set_coefficients(coefficients);
@@ -86,29 +86,34 @@ int main()
     double t = 0;
     int count = 0;
     int timesteps_saved = 100;
-    int save_every = (T / dt) / timesteps_saved ? 1 : (T / dt) / timesteps_saved;
-
+    int save_every = ((T / dt) / timesteps_saved) == 0 ? 1 : (T / dt) / timesteps_saved;
     auto problem = std::make_shared<NonlinearVariationalProblem>(F, w, bcs, J);
     auto solver = NonlinearVariationalSolver(problem);
 
     // snes solver -- comment out to use newton solver
     solver.parameters["nonlinear_solver"] = "snes";
-    solver.parameters("snes_solver")["line_search"] = "basic";
+    solver.parameters("snes_solver")["line_search"] = "bt";
     solver.parameters("snes_solver")["linear_solver"] = "mumps";
+    solver.parameters("snes_solver")["preconditioner"] = "hypre_amg";
+    solver.parameters("snes_solver")["report"] = true;
+
+    char time_stdout_buffer[50];
 
     while (t < T + DOLFIN_EPS)
     {
-        *w_->vector() = *w->vector();
+        *w0->vector() = *w->vector();
 
         solver.solve();
 
         // Save to file
         if (count % save_every == 0)
         {
-            file << (*w_)[0];
+            file << (*w0)[0];
         }
 
-        std::cout << "t: " << t << std::endl;
+        // std::cout << "t: " << t << std::endl;
+        sprintf(time_stdout_buffer, "CURRENT TIME: %f", t);
+        info(time_stdout_buffer);
 
         // Move to next time step
         t += dt;
