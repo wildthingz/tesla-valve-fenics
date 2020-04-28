@@ -12,6 +12,10 @@
 
  - [Cahn-Hillard tutorial](https://bitbucket.org/fenics-project/dolfin/src/master/demo/documented/cahn-hilliard/cpp/)
 
+ - [this](http://www.pefarrell.org/wp-content/uploads/2015/05/pythonfenics.pdf)
+
+ - [this](https://fenicsproject.discourse.group/t/navier-stokes-stability-jacobian-and-eigenvalues/1833)
+
 ## Solver check
 
 ```c++

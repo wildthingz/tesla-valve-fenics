@@ -94,7 +94,7 @@ int main()
     // snes solver -- comment out to use newton solver
     solver.parameters["nonlinear_solver"] = "snes";
     solver.parameters("snes_solver")["line_search"] = "basic";
-    solver.parameters("snes_solver")["linear_solver"] = "lu";
+    solver.parameters("snes_solver")["linear_solver"] = "mumps";
 
     while (t < T + DOLFIN_EPS)
     {
