@@ -1,4 +1,0 @@
-# pylint: disable-all
-# Define elements
-cell = triangle
-

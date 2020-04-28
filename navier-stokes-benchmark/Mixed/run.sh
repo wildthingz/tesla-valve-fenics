@@ -2,7 +2,7 @@
 # to compile and run: ./run.sh -c
 # to just run       : ./run.sh
 
-PROJECT_NAME="navier-stokes"
+PROJECT_NAME="mixed-benchmark"
 
 ## if -c is provided change the project in cmakelists to $PROJECT_NAME
 [ "$1" == "-c" ] &&
@@ -18,7 +18,7 @@ ffc -l dolfin *.ufl
 
 ## if -c is provided make build directory, and compile the code
 [ "$1" == "-c" ] &&
-mkdir build && cd build && echo "localhost slots=10" > hostfile && cmake .. && make && cd ..
+mkdir build && cd build && cmake .. && make && cd ..
 
 ## delete results folder if exists
 [ -d "results" ] && rm -rf results
@@ -28,6 +28,7 @@ mkdir build && cd build && echo "localhost slots=10" > hostfile && cmake .. && m
 
 ## make results folder and run the executable
 mkdir results && cd results
-
+echo "localhost slots=10" > hostfile
 export OMP_NUM_THREADS=1
-mpirun --hostfile ../build/hostfile -n 5 ../build/$PROJECT_NAME
+mpirun --hostfile hostfile -n 6 ../build/$PROJECT_NAME
+
