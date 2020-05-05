@@ -9,7 +9,7 @@ PROJECT_NAME="Chorin-benchmark"
 sed -i "s/\(set[(]PROJECT_NAME \)\(.*\)\([)]\)/\1 $PROJECT_NAME\3/g" CMakeLists.txt
 
 ## if -c is provided compile the ufl file
-[ "$1" == "-c" ] &&
+[ "$1" == "-c" ] && [ -f *.ufl ] &&
 ffc -l dolfin *.ufl
 
 ## if -c is provided delete the old build folder
@@ -31,3 +31,4 @@ mkdir results && cd results
 echo "localhost slots=10" > hostfile
 export OMP_NUM_THREADS=1
 mpirun --hostfile hostfile -n 6 ../build/$PROJECT_NAME
+
