@@ -20,10 +20,9 @@ To add SUPG stabilization we first need to define the residual of Navier Stokes 
         - theta*div(sigma(w, nu, mesh)) - (1.0-theta)*div(sigma(w0, nu, mesh))`
 
 with the following stabilization parameters
-`# stabilization parameter
-    h = CellDiameter(mesh)
-    u_norm = sqrt(dot(w.split()[0], w.split()[0]))
-    tau_supg = ((2.0/k)**2 + (2.0*u_norm/h)**2 + (4.0*nu/h**2)**2)**(-0.5)`
+`h = CellDiameter(mesh)`
+`u_norm = sqrt(dot(w.split()[0], w.split()[0]))`
+`tau_supg = ((2.0/k)**2 + (2.0*u_norm/h)**2 + (4.0*nu/h**2)**2)**(-0.5)`
 
 SUPG stabilization term is then
 `F_supg = tau_supg*inner(grad(u)*v, r)*dx`
@@ -34,6 +33,6 @@ SUPG stabilization term is then
 Note: solver does not converge with PSPG, more tests are needed.
 
 **LSIC stabilization**
-`tau_lsic = -2/3 * nu
-Flsic = tau_lsic*inner(div(v), div(u))*dx`
+`tau_lsic = -2/3 * nu`
+`Flsic = tau_lsic*inner(div(v), div(u))*dx`
 Note: solver does not converge with LSIC
