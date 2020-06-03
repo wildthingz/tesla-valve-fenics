@@ -3,6 +3,9 @@ from fenics import *
 import numpy as np
 import time
 
+eps = 1e-5
+
+
 def readMesh(path):
     mesh = Mesh()
     with XDMFFile(path + "domain.xdmf") as infile:
@@ -12,6 +15,7 @@ def readMesh(path):
         infile.read(mvc, "boundaries")
     boundaries = cpp.mesh.MeshFunctionSizet(mesh, mvc)
     return (mesh, boundaries)
+
 
 def ufl(mesh, f, dt, nu, theta):
     Ve = VectorElement("CG", mesh.ufl_cell(), 2)
@@ -26,19 +30,21 @@ def ufl(mesh, f, dt, nu, theta):
     u0, _ = split(w0)
 
     # Define coefficients
-    k = dt 
+    k = dt
     um = theta*u + (1.0-theta)*u0
 
     F = (1/k)*inner(u - u0, v)*dx + inner(grad(um)*um, v)*dx + \
-        nu*inner(grad(um), grad(v))*dx - inner(grad(p), v) * \
+        nu*inner(grad(um), grad(v))*dx + inner(grad(p), v) * \
         dx - inner(f, v)*dx + div(um)*q*dx
 
     J = derivative(F, w)
 
     return (F, J, W, w, w0)
 
+
 def boundaryCondition(mesh, boundaries, W):
-    v_in = Expression(("4 * 1.5 * (x[1] * (0.41 - x[1])) / (0.41 * 0.41)", "0."), degree=2) 
+    v_in = Expression(
+        ("4 * 0.3 * (x[1] * (0.41 - x[1])) / (0.41 * 0.41)", "0."), degree=2)
     p_out = Constant(0.0)
     zero_vec = Constant((0, 0))
 
@@ -47,18 +53,46 @@ def boundaryCondition(mesh, boundaries, W):
     top_bottom_boundaries = DirichletBC(W.sub(0), zero_vec, boundaries, 3)
     cylinder_boundaries = DirichletBC(W.sub(0), zero_vec, boundaries, 4)
 
-    bcs = [bcp_inflow, bcp_outflow, top_bottom_boundaries, cylinder_boundaries] 
-    
+    bcs = [bcp_inflow, bcp_outflow, top_bottom_boundaries, cylinder_boundaries]
+
     return bcs
+
+
+def force(mesh, boundaries, w, nu):
+    # Initialize mesh function for boundary domains
+    ds_cylinder = Measure(
+        'ds', domain=mesh, subdomain_data=boundaries,  subdomain_id=4)
+
+    # Calculate force
+    n = FacetNormal(mesh)
+
+    u = w.split()[0]
+    p = w.split()[1]
+
+    F = nu * dot(grad(u), n) - p * n
+
+    D = -F[0] * ds_cylinder
+    L = -F[1] * ds_cylinder
+
+    drag_force = assemble(D)
+    lift_force = assemble(L)
+
+    Umean = 0.2
+    L = 0.1
+    drag_coeff = drag_force * 2 / (L * Umean**2)
+    lift_coeff = lift_force * 2 / (L * Umean**2)
+
+    return (drag_force, lift_force, drag_coeff, lift_coeff)
+
 
 def main():
     meshPath = "../mesh/"
-    
+
     dt = 0.01
-    f = Constant((0,0))
+    f = Constant((0, 0))
     mu = 0.001
     rho = 1
-    theta = 0.5 # Crank-Nicholson
+    theta = 0.5  # Crank-Nicholson
     T = 5
 
     (mesh, boundaries) = readMesh(meshPath)
@@ -77,6 +111,15 @@ def main():
         file << w0.split()[0]
         info("Current time: {0:1.3f}".format(t))
         t += dt
+
+    drag_force_t = force(mesh, boundaries, w, mu/rho)[0]
+    lift_force_t = force(mesh, boundaries, w, mu/rho)[1]
+    drag_coeff_t = force(mesh, boundaries, w, mu/rho)[2]
+    lift_coeff_t = force(mesh, boundaries, w, mu/rho)[3]
+
+    info("drag force: {0:2.5f}\nlift force: {1:2.5f}\ndrag coeff: {2:2.5f}\nlift coeff: {3:2.5f}".format(
+        drag_force_t, lift_force_t, drag_coeff_t, lift_coeff_t))
+
 
 if __name__ == "__main__":
 
