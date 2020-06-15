@@ -1,0 +1,22 @@
+# pylint: disable-all
+# Define elements
+
+cell = triangle
+
+vElem = VectorElement("P", cell, 2)
+fElem = FiniteElement("P", cell, 1)
+thElem = vElem * fElem
+rElem = FiniteElement("Real", cell, 0)
+
+w = Coefficient(thElem)
+u, p = split(w)
+
+nu = Coefficient(rElem)
+
+n = FacetNormal(cell)
+force = nu * dot(grad(u), n) - p * n
+
+drag_force = -force[0] * ds(4)
+lift_force = -force[1] * ds(4)
+
+forms = [drag_force, lift_force]

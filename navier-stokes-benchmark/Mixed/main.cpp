@@ -1,7 +1,20 @@
 #include <dolfin.h>
 #include "NonlinearNS.h"
+#include "Functionals.h"
 
 using namespace dolfin;
+
+struct MeshOut {
+    std::shared_ptr<dolfin::Mesh> mesh;
+    std::shared_ptr<dolfin::MeshFunction<std::size_t>> boundaries;
+};
+
+struct LiftDrag {
+    double drag_force;
+    double lift_force;
+    double drag_coeff;
+    double lift_coeff;
+};
 
 // inlet
 class InflowVelocity : public Expression
@@ -18,13 +31,62 @@ public:
     }
 };
 
+MeshOut get_mesh() {
+    auto mesh = std::make_shared<Mesh>();
+    XDMFFile initialmeshfile(MPI_COMM_WORLD, "../../mesh/domain.xdmf");
+    initialmeshfile.read(*mesh);
+
+    MeshValueCollection<std::size_t> mf_mvc(mesh, 2);
+    XDMFFile initialmffile(MPI_COMM_WORLD, "../../mesh/boundaries.xdmf");
+    initialmffile.read(mf_mvc, "boundaries");
+    auto boundaries = std::make_shared<MeshFunction<std::size_t>>(mesh, mf_mvc);
+
+    return {.mesh = mesh, .boundaries = boundaries};
+};
+
+LiftDrag lift_drag(MeshOut meshout, std::shared_ptr<dolfin::Function> w, std::shared_ptr<dolfin::Constant> nu) {
+    
+    auto mesh = meshout.mesh;
+    auto boundaries = meshout.boundaries;
+    
+    Functionals::Form_lift_force lift_force(mesh, w, nu);
+    Functionals::Form_drag_force drag_force(mesh, w, nu);
+
+    lift_force.ds = boundaries;
+    drag_force.ds = boundaries;
+
+
+
+    // Assemble functionals over sub domain
+    double lift = assemble(lift_force);
+    double drag = assemble(drag_force);
+
+    double Umean = 0.2;
+    double L = 0.1;
+    double drag_coeff = drag * 2 / (L * Umean*Umean);
+    double lift_coeff = lift * 2 / (L * Umean*Umean);
+
+    char liftdrag_buffer[50];
+
+    sprintf(liftdrag_buffer, "DRAG FORCE: %f", liftdrag.drag_force);
+    info(liftdrag_buffer);
+    sprintf(liftdrag_buffer, "LIFT FORCE: %f", liftdrag.lift_force);
+    info(liftdrag_buffer);
+    sprintf(liftdrag_buffer, "DRAG COEFF: %f", liftdrag.drag_coeff);
+    info(liftdrag_buffer);
+    sprintf(liftdrag_buffer, "LIFT COEFF: %f", liftdrag.lift_coeff);
+    info(liftdrag_buffer);
+    
+    return {drag, lift, drag_coeff, lift_coeff};
+}
+
 int main()
 {
     // Print log messages only from the root process in parallel
     parameters["std_out_all_processes"] = false;
 
     // Set parameter values
-    double dt = 0.001;
+    double dt = 0.01;
     double T = 5;
     double mu = 0.001;
     double rho = 1;
@@ -34,15 +96,9 @@ int main()
     // Load mesh from file
     // auto mesh = std::make_shared<Mesh>("../mesh/cylinder.xml");
     // MeshFunction<std::size_t> boundaries(mesh, "../mesh/cylinder_facet_region.xml");
-
-    auto mesh = std::make_shared<Mesh>();
-    XDMFFile initialmeshfile(MPI_COMM_WORLD, "../../mesh/domain.xdmf");
-    initialmeshfile.read(*mesh);
-
-    MeshValueCollection<std::size_t> mf_mvc(mesh, 2);
-    XDMFFile initialmffile(MPI_COMM_WORLD, "../../mesh/boundaries.xdmf");
-    initialmffile.read(mf_mvc, "boundaries");
-    auto boundaries = std::make_shared<MeshFunction<std::size_t>>(mesh, mf_mvc);
+    auto meshout = get_mesh();
+    auto mesh = meshout.mesh;
+    auto boundaries = meshout.boundaries;
 
     auto W = std::make_shared<NonlinearNS::FunctionSpace>(mesh);
 
@@ -85,7 +141,7 @@ int main()
     // Time-stepping
     double t = 0;
     int count = 0;
-    int timesteps_saved = 100;
+    int timesteps_saved = 1;
     int save_every = ((T / dt) / timesteps_saved) == 0 ? 1 : (T / dt) / timesteps_saved;
     auto problem = std::make_shared<NonlinearVariationalProblem>(F, w, bcs, J);
     auto solver = NonlinearVariationalSolver(problem);
@@ -119,5 +175,7 @@ int main()
         t += dt;
         count++;
     }
+
+    auto liftdrag = lift_drag(meshout, w, nu);
     return 0;
 }

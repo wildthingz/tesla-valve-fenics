@@ -9,7 +9,8 @@ PROJECT_NAME="mixed-benchmark"
 sed -i "s/\(set[(]PROJECT_NAME \)\(.*\)\([)]\)/\1 $PROJECT_NAME\3/g" CMakeLists.txt
 
 ## if -c is provided compile the ufl file
-[ "$1" == "-c" ] && [ -f *.ufl ] &&
+count=`ls -1 *.ufl 2>/dev/null | wc -l`
+[ "$1" == "-c" ] && [ $count != 0 ] && 
 ffc -l dolfin *.ufl
 
 ## if -c is provided delete the old build folder
