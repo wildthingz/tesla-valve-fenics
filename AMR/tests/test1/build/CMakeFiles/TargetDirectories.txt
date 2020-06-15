@@ -1,3 +1,0 @@
-/home/hatef/Documents/teslavalvefenics/test/cpp/build/CMakeFiles/rebuild_cache.dir
-/home/hatef/Documents/teslavalvefenics/test/cpp/build/CMakeFiles/edit_cache.dir
-/home/hatef/Documents/teslavalvefenics/test/cpp/build/CMakeFiles/test.dir

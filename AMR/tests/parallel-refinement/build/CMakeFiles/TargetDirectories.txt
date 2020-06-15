@@ -1,3 +1,0 @@
-/home/hatef/Documents/teslavalvefenics/AMR/tests/parallel-refinement/build/CMakeFiles/rebuild_cache.dir
-/home/hatef/Documents/teslavalvefenics/AMR/tests/parallel-refinement/build/CMakeFiles/edit_cache.dir
-/home/hatef/Documents/teslavalvefenics/AMR/tests/parallel-refinement/build/CMakeFiles/parallel-refinement.dir
