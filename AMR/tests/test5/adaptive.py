@@ -136,7 +136,7 @@ def main():
     theta = 0.5  # Crank-Nicholson
 
     # adaptive parameters
-    adaptive = False
+    adaptive = True
     adapt_ratio = 0.03
     tol = 1e-3
     ref = 0
@@ -215,7 +215,9 @@ def main():
 
             if adaptive:  # Refine mesh
                 rmesh = refine(mesh, cell_markers)
-                boundaries = adapt(boundaries, mesh)
+                # meshdata = mesh.data()
+                # print(meshdata.array("parent_cell", 2))
+                boundaries = adapt(boundaries, rmesh)
                 mesh = rmesh  # Shift to next adaptive iteration
             else: 
                 break
