@@ -157,7 +157,7 @@ int main()
     M->ds = boundaries;
 
     File file("velocity.pvd");
-    // File meshfile("mesh.pvd");
+    File meshfile("mesh.pvd");
     // Time-stepping
     double t = 0;
     int count = 0;
@@ -176,15 +176,16 @@ int main()
 
     while (t < T + DOLFIN_EPS)
     {
-        (*w0->leaf_node_shared_ptr())->vector() = (*w->leaf_node_shared_ptr())->vector();
-        solver.solve(tol);
+        // (w0->leaf_node_shared_ptr())->vector() = (w->leaf_node_shared_ptr())->vector();
         // *w0->vector() = *w->vector();
+        (w0->leaf_node()).vector() = (w->leaf_node()).vector();
+        solver.solve(tol);
         
         // Save to file
         if (count % save_every == 0)
         {
             file << (*w0)[0];
-            // meshfile << (*w0).leaf_node();
+            meshfile << (w0->leaf_node())[1];
         }
         // (*w).leaf_node() = (*w0).leaf_node();
         // std::cout << "t: " << t << std::endl;
