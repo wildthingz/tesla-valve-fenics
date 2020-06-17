@@ -7,11 +7,31 @@ from fenics import *
 # Use compiler optimizations
 parameters["form_compiler"]["cpp_optimize"] = True
 
-# # Allow approximating values for points that may be generated outside
-# # of domain (because of numerical inaccuracies)
-# parameters["allow_extrapolation"] = True
+# Allow approximating values for points that may be generated outside
+# of domain (because of numerical inaccuracies)
+parameters["allow_extrapolation"] = True
 parameters["refinement_algorithm"] = "plaza_with_parent_facets"
 
+cpp_code = """
+#include <pybind11/pybind11.h>
+#include <dolfin/adaptivity/adapt.h>
+#include <dolfin/fem/NonlinearVariationalProblem.h>
+#include <dolfin/mesh/Mesh.h>
+namespace py = pybind11;
+PYBIND11_MODULE(SIGNATURE, m)
+{
+m.def("adapt", [](const dolfin::NonlinearVariationalProblem& problem,
+		  std::shared_ptr<const dolfin::Mesh> adapted_mesh)
+          {
+	         return dolfin::adapt(problem, adapted_mesh);
+          }
+     );
+}
+"""
+m = compile_cpp_code(cpp_code)
+
+def adaptProblem(problem,mesh):
+    return m.adapt(problem,mesh)
 
 def readMesh(path):
     mesh = Mesh()
@@ -140,7 +160,7 @@ def main():
     adapt_ratio = 0.03
     tol = 1e-3
     ref = 0
-    maxiters = 20
+    maxiters = 1
 
     # output file initialization
     fileU = File("velocity.pvd")
@@ -150,24 +170,18 @@ def main():
     # initial mesh
     (mesh, boundaries) = readMesh(meshPath)
 
+    
+    (F, J, W, w, w0, wt) = ufl(mesh, boundaries, f, dt, nu, theta)
+    bcs = boundaryCondition(mesh, boundaries, W)
+    problem = NonlinearVariationalProblem(F, w, bcs, J)
+
     t = 0
     while t <= T:
         for i in range(maxiters):
-            (F, J, W, w, w0, wt) = ufl(mesh, boundaries, f, dt, nu, theta)
-            w0.assign(w)
-            fileMesh << W.mesh()
-
-            bcs = boundaryCondition(mesh, boundaries, W)
-            # if MPI.comm_world.rank == 0:
-            #     print(boundaries)
-            #     print(mesh)
-            # return
-
-            problem = NonlinearVariationalProblem(F, w, bcs, J)
             solver = NonlinearVariationalSolver(problem)
             solver.solve()
 
-            fileU << w0.split()[0]
+            fileU << w
 
             output = assemble(M(mesh, boundaries, w, nu))
             print("adaptive iter: {0:3d} num_vertices: {1:5d} output: {2:2.5f} err: {3:2.5f}".format
@@ -214,15 +228,15 @@ def main():
                 cell_markers[c] = gamma[c.index()] > gamma_0
 
             if adaptive:  # Refine mesh
-                rmesh = refine(mesh, cell_markers)
+                rmesh = refine(mesh, cell_markers, False)
                 # meshdata = mesh.data()
                 # print(meshdata.array("parent_cell", 2))
-                boundaries = adapt(boundaries, rmesh)
+                problem = adaptProblem(problem, rmesh)
                 mesh = rmesh  # Shift to next adaptive iteration
-            else: 
+            else:
                 break
-        
-        
+
+        w0.assign(w)
         t += dt
 
 
