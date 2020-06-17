@@ -1,183 +1,154 @@
 #!/usr/bin/env python
-
-# pylint: disable-all
-# Copyright (c) 2017-2018 Johan Jansson, Cem Degirmenci
 from fenics import *
-from mshr import *
+import numpy as np
+import time
 import matplotlib.pyplot as plt
-from ufl import replace
 
-# Compact plot utility function
-def plot_compact(u, t, stepcounter, QQ, pl, ax, label="Velocity", clear=True):
-    if stepcounter == 0:
-        pl, ax = plt.subplots()
-        display(pl)
-        if clear:
-            clear_output()  # Plotting setup
-    if stepcounter % 5 == 0:
-        uEuclidnorm = project(sqrt(inner(u, u)), QQ)
-        ax.cla()
-        fig = plt.gcf()
-        fig.set_size_inches(16, 4)
-        plt.subplot(1, 2, 1)
-        pp = plot(uEuclidnorm, cmap="coolwarm")
-        plt.title("%s at t=%f" % (label, t))  # Plot norm of velocity
-        if t == 0.:
-            plt.axis(G)
-            plt.colorbar(pp, shrink=0.5)
-        plt.subplot(1, 2, 2)
-        if t == 0.:
-            plot(Q.mesh())
-            plt.title("Mesh")  # Plot mesh
-        plt.tight_layout()
-
-    return (pl, ax)
-
-
-def plot_compact_static(u, QQ, label="Velocity"):  # Compact plot utility function
-    pl, ax = plt.subplots()
-    uEuclidnorm = project(sqrt(inner(u, u)), QQ)
-    ax.cla()
-    fig = plt.gcf()
-    fig.set_size_inches(16, 4)
-    plt.subplot(1, 2, 1)
-    pp = plot(uEuclidnorm, cmap="coolwarm")
-    plt.title("%s" % (label))  # Plot norm of velocity
-    plt.axis(G)
-    plt.colorbar(pp, shrink=0.5)
-    plt.subplot(1, 2, 2)
-    plot(Q.mesh())
-    plt.title("Mesh")  # Plot mesh
-    plt.tight_layout()
-
-    return (pl, ax)
-
-
-XMIN = 0.
-XMAX = 2.5
-YMIN = 0
-YMAX = 0.41
-G = [XMIN, XMAX, YMIN, YMAX]
 eps = 1e-5
-mresolution = 10  # Geometry and mesh
-ghole = [0.15, 0.25, 0.15, 0.25]
-mesh = generate_mesh(Rectangle(Point(G[0], G[2]), Point(
-    G[1], G[3])) - Rectangle(Point(ghole[0], ghole[2]), Point(ghole[1], ghole[3])), mresolution)
+
+# Use compiler optimizations
+parameters["form_compiler"]["cpp_optimize"] = True
+
+# Allow approximating values for points that may be generated outside
+# of domain (because of numerical inaccuracies)
+parameters["allow_extrapolation"] = True
+parameters["refinement_algorithm"] = "plaza_with_parent_facets"
+
+def readMesh(path):
+    mesh = Mesh()
+    with XDMFFile(path + "domain.xdmf") as infile:
+        infile.read(mesh)
+    mvc = MeshValueCollection("size_t", mesh, 2)
+    with XDMFFile(path + "boundaries.xdmf") as infile:
+        infile.read(mvc, "boundaries")
+    boundaries = cpp.mesh.MeshFunctionSizet(mesh, mvc)
+    return (mesh, boundaries)
 
 
-XMIN = 0.
-XMAX = 2.5
-YMIN = 0
-YMAX = 0.41
-G = [XMIN, XMAX, YMIN, YMAX]
-eps = 1e-5
-mresolution = 10  # Geometry and mesh
-ghole = [0.15, 0.25, 0.15, 0.25]
-mesh = generate_mesh(Rectangle(Point(G[0], G[2]), Point(
-    G[1], G[3])) - Rectangle(Point(ghole[0], ghole[2]), Point(ghole[1], ghole[3])), mresolution)
+def ufl(mesh, boundaries, f, dt, nu, theta):
+    Ve = VectorElement("CG", mesh.ufl_cell(), 2)
+    Qe = FiniteElement("CG", mesh.ufl_cell(), 1)
+    W = FunctionSpace(mesh, Ve * Qe)
 
-
-def M(mesh, u, p):
-    """Output functional"""
-    def epsilon(z):
-        return 0.5*(grad(z) + grad(z).T)
-
-    n = FacetNormal(mesh)
-
-    I = Identity(2)
-    sigma = p*I - 2*nu*epsilon(u)
-    theta = Constant((1.0, 0.0))
-
-    g = Expression(
-        ("200.0*exp(-200.0*(pow(x[0] - 0.5, 2) + pow(x[1] - 0.3, 2)))", "0.0"), degree=2)
-
-    M1 = psimarker*p*n[0]*ds  # Drag (only pressure)
-    M2 = psimarker*p*n[1]*ds  # Lift (only pressure)
-    M3 = inner(g, u)*dx  # Mean of the velocity in a region
-    M4 = psimarker*dot(dot(sigma, n), theta)*ds  # Drag (full stress)
-    M5 = u[0]*dx  # Mean of the x-velocity in the whole domain
-
-    return M1
-
-
-ref = 0.128069
-
-nu = 4e-3  # Viscosity
-adaptive = True
-adapt_ratio = 0.03
-maxiters = 20
-
-for i in range(0, maxiters):
-    # Declare FE spaces
-    VE = VectorElement("CG", mesh.ufl_cell(), 1)
-    QE = FiniteElement("CG", mesh.ufl_cell(), 1)
-    h = CellDiameter(mesh)  # FEM functions
-    WE = VE * QE
-    W = FunctionSpace(mesh, WE)
-    V = FunctionSpace(mesh, VE)
-    Q = FunctionSpace(mesh, QE)  # Make a mixed space
-    wt = TestFunction(W)
-    (v, q) = (as_vector((wt[0], wt[1])), wt[2])
+    # Define test functions
     w = Function(W)
-    (u, p) = (as_vector((w[0], w[1])), w[2])
-    u0 = Function(V)
-    phi = Function(W)
-    (phi_u, phi_p) = (as_vector((phi[0], phi[1])), phi[2])
+    u, p = split(w)
+    (v, q) = TestFunctions(W)
+    w0 = Function(W)
+    u0, p0 = split(w0)
 
-    ZE = FiniteElement("DG", mesh.ufl_cell(), 0)
-    Z = FunctionSpace(mesh, ZE)
-    z = TestFunction(Z)
+    # Define coefficients
+    k = dt
+    um = theta*u + (1.0-theta)*u0
 
-    uin = Expression(("4*(x[1]*(YMAX-x[1]))/(YMAX*YMAX)", "0."),
-                     YMAX=YMAX, element=V.ufl_element())  # Inflow velocity
-    om = Expression("x[0] > XMAX - eps ? 1. : 0.", XMAX=XMAX, eps=eps,
-                    element=Q.ufl_element())  # Mark regions for boundary conditions
-    im = Expression("x[0] < XMIN + eps ? 1. : 0.", XMIN=XMIN,
-                    eps=eps, element=Q.ufl_element())
-    nm = Expression("x[0] > XMIN + eps && x[0] < XMAX - eps ? 1. : 0.",
-                    XMIN=XMIN, XMAX=XMAX, eps=eps, element=Q.ufl_element())
-    psimarker = Expression("x[0] > XMIN + eps && x[1] >  YMIN + eps && x[0] < XMAX - eps && x[1] < YMAX - eps ? 1. : 0.",
-                           XMIN=XMIN, XMAX=XMAX, YMIN=YMIN, YMAX=YMAX, eps=eps, element=Q.ufl_element())
+    F = (1/k)*inner(u - u0, v)*dx + inner(grad(um)*um, v)*dx + \
+        nu*inner(grad(um), grad(v))*dx + inner(grad(p), v) * \
+        dx - inner(f, v)*dx + div(um)*q*dx
+
+    J = derivative(F, w)
+
+    ds_cylinder = Measure(
+        'ds', domain=mesh, subdomain_data=boundaries,  subdomain_id=4)
 
     n = FacetNormal(mesh)
-    d = .5*h  # Stabilization parameter
-    gamma = 10*1./h  # Penalty parameter
+    F1 = nu * dot(grad(u), n) - p * n
+    M = -F1[0]*ds_cylinder
 
-    r = ((inner(grad(p) + grad(u)*u, v) + nu*inner(grad(u), grad(v)) + div(u)*q)*dx +
-         # Weak boundary conditions
-         gamma*(om*p*q + im*inner(u - uin, v) + nm*inner(u, v))*ds +
-         d*(inner(grad(p) + grad(u)*u, grad(q) + grad(u)*v) + inner(div(u), div(v)))*dx)  # Stabilization
-    solve(r == 0, w)  # Solve the Navier-Stokes PDE (stationary)
-    # Plot all quantities (see implementation above)
-    plot_compact_static(u, Q, "Velocity")
+    # M=u[0]*dx
 
-    output = assemble(M(mesh, u, p))
-    print("adaptive iter: %d num_vertices: %d output: %f err: %f" %
-          (i, mesh.num_vertices(), output, abs(ref - output)))
+    return (F, J, M, W, w, w0)
 
-    a_dual = adjoint(derivative(r, w))  # Construct the adjoint problem
-    L_dual = M(mesh, v, q)
-    # Solve the adjoint Navier-Stokes PDE (stationary)
-    solve(a_dual == L_dual, phi)
 
-    # Plot all quantities (see implementation above)
-    plot_compact_static(phi, Q, "Adjoint Velocity")
+def boundaryCondition(mesh, boundaries, W):
+    v_in = Expression(
+        ("4 * 0.3 * (x[1] * (0.41 - x[1])) / (0.41 * 0.41)", "0."), degree=2)
+    p_out = Constant(0.0)
+    zero_vec = Constant((0, 0))
 
-    Lei = replace(r, {wt: phi*z})  # Construct error indicators
-    ei = assemble(Lei)
-    # Get value array (assume serial implementation)
-    gamma = abs(ei.get_local())
+    bcp_inflow = DirichletBC(W.sub(0), v_in, boundaries, 1)
+    bcp_outflow = DirichletBC(W.sub(1), p_out, boundaries, 2)
+    top_bottom_boundaries = DirichletBC(W.sub(0), zero_vec, boundaries, 3)
+    cylinder_boundaries = DirichletBC(W.sub(0), zero_vec, boundaries, 4)
 
-    # Mark cells for refinement
-    cell_markers = MeshFunction("bool", mesh, mesh.topology().dim())
-    gamma_0 = sorted(gamma, reverse=True)[int(len(gamma)*adapt_ratio) - 1]
-    for c in cells(mesh):
-        cell_markers[c] = gamma[c.index()] > gamma_0
+    bcs = [bcp_inflow, bcp_outflow, top_bottom_boundaries, cylinder_boundaries]
 
-    if adaptive:  # Refine mesh
-        rmesh = refine(mesh, cell_markers)
-    else:
-        rmesh = refine(mesh)
-    mesh = rmesh  # Shift to next adaptive iteration
+    return bcs
 
-plt.show()
+
+def force(mesh, boundaries, w, w0, nu):
+    # Initialize mesh function for boundary domains
+    # R = w.leaf_node().function_space()
+    ds_cylinder = Measure(
+        'ds', domain=mesh, subdomain_data=boundaries,  subdomain_id=4)
+
+    # Calculate force
+    n = FacetNormal(mesh)
+
+    u = w.split()[0]
+    p = w.split()[1]
+
+    F = nu * dot(grad(u), n) - p * n
+
+    D = -F[0] * ds_cylinder
+    L = -F[1] * ds_cylinder
+
+    drag_force = assemble(D)
+    lift_force = assemble(L)
+
+    Umean = 0.2
+    L = 0.1
+    drag_coeff = drag_force * 2 / (L * Umean**2)
+    lift_coeff = lift_force * 2 / (L * Umean**2)
+
+    return (drag_force, lift_force, drag_coeff, lift_coeff)
+
+
+def main():
+    meshPath = "../mesh/"
+
+    dt = 0.01
+    f = Constant((0, 0))
+    mu = 0.001
+    rho = 1
+    tol = 1e-3
+    theta = 0.5  # Crank-Nicholson
+    T = 1
+
+    (mesh, boundaries) = readMesh(meshPath)
+    (F, J, M, W, w, w0) = ufl(mesh, boundaries, f, dt, mu/rho, theta)
+    bcs = boundaryCondition(mesh, boundaries, W)
+
+    problem = NonlinearVariationalProblem(F, w, bcs, J)
+    solver = AdaptiveNonlinearVariationalSolver(problem, M)
+
+    file = File("velocity.pvd")
+    meshfile = File("mesh.pvd")
+
+    t = 0
+    while t <= T:
+    
+        w0.leaf_node().vector()[:] = w.leaf_node().vector()
+        # w0 = w.copy()
+        solver.solve(tol)
+        file << w.leaf_node().split()[0]
+        meshfile << w.leaf_node()
+        info("Current time: {0:1.3f}".format(t))
+        t += dt
+
+    drag_force_t = force(mesh, boundaries, w, w0, mu/rho)[0]
+    lift_force_t = force(mesh, boundaries, w, w0, mu/rho)[1]
+    drag_coeff_t = force(mesh, boundaries, w, w0, mu/rho)[2]
+    lift_coeff_t = force(mesh, boundaries, w, w0, mu/rho)[3]
+
+    info("drag force: {0:2.5f}\nlift force: {1:2.5f}\ndrag coeff: {2:2.5f}\nlift coeff: {3:2.5f}".format(
+        drag_force_t, lift_force_t, drag_coeff_t, lift_coeff_t))
+
+    # Show solver summary
+    solver.summary()
+
+    # Show all timings
+    list_timings(TimingClear.clear, [TimingType.wall])
+
+if __name__ == "__main__":
+
+    main()
