@@ -1,3 +1,3 @@
-# Test 4
+# Test 5
 
-Adaptive steady state Navier-Stokes using strong boundary conditions. 
+Adaptive transient state Navier-Stokes using strong boundary conditions.

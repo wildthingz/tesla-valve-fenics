@@ -30,8 +30,8 @@ m.def("adapt", [](const dolfin::NonlinearVariationalProblem& problem,
 """
 m = compile_cpp_code(cpp_code)
 
-def adaptProblem(problem,mesh):
-    return m.adapt(problem,mesh)
+def adaptProblem(problem, mesh):
+    return m.adapt(problem, mesh)
 
 def readMesh(path):
     mesh = Mesh()
