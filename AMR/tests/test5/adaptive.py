@@ -2,7 +2,8 @@
 
 # pylint: disable-all
 
-from fenics import *
+from dolfin import *
+from dolfin.jit.jit import dolfin_pc
 
 # Use compiler optimizations
 parameters["form_compiler"]["cpp_optimize"] = True
@@ -12,26 +13,57 @@ parameters["form_compiler"]["cpp_optimize"] = True
 parameters["allow_extrapolation"] = True
 parameters["refinement_algorithm"] = "plaza_with_parent_facets"
 
-cpp_code = """
-#include <pybind11/pybind11.h>
-#include <dolfin/adaptivity/adapt.h>
-#include <dolfin/fem/NonlinearVariationalProblem.h>
-#include <dolfin/mesh/Mesh.h>
-namespace py = pybind11;
-PYBIND11_MODULE(SIGNATURE, m)
-{
-m.def("adapt", [](const dolfin::NonlinearVariationalProblem& problem,
-		  std::shared_ptr<const dolfin::Mesh> adapted_mesh)
-          {
-	         return dolfin::adapt(problem, adapted_mesh);
-          }
-     );
-}
-"""
-m = compile_cpp_code(cpp_code)
+# cpp_code = """
+# #include <pybind11/pybind11.h>
+# #include <dolfin/adaptivity/adapt.h>
+# #include <dolfin/fem/NonlinearVariationalProblem.h>
+# #include <dolfin/mesh/Mesh.h>
+# #include <pybind11/pybind11.h>
+# #include <pybind11/stl.h>
+# #include <boost/variant.hpp>
+# #include <boost/optional.hpp>
 
-def adaptProblem(problem, mesh):
-    return m.adapt(problem, mesh)
+# namespace pybind11
+# {
+#   namespace detail
+#   {
+#     // Caster for boost::optional
+#     template <typename T>
+#       struct type_caster<boost::optional<T>> : optional_caster<boost::optional<T>> {};
+
+#     // Caster for boost::variant (from pybind11 docs)
+#     template <typename... Ts>
+#       struct type_caster<boost::variant<Ts...>> : variant_caster<boost::variant<Ts...>> {};
+
+#     // Specifies the function used to visit the variant --
+#     // `apply_visitor` instead of `visit`
+#     template <>
+#       struct visit_helper<boost::variant> {
+#       template <typename... Args>
+#         static auto call(Args &&...args) -> decltype(boost::apply_visitor(args...)) {
+#         return boost::apply_visitor(args...);
+#       }
+#     };
+#   }
+# }
+
+# namespace py = pybind11;
+
+# PYBIND11_MODULE(SIGNATURE, m)
+# {
+#     m.def("adapt", (std::shared_ptr<dolfin::NonlinearVariationalProblem> (*)(const dolfin::NonlinearVariationalProblem&,
+#     std::shared_ptr<const dolfin::Mesh>)) &dolfin::adapt,
+#     py::arg("problem"), py::arg("adapted_mesh"));
+# }
+# """
+# adapt = compile_cpp_code(cpp_code, include_dirs=["/usr/include/dolfin/"], library_dirs=["/usr/lib/"]).adapt
+
+# print(dir(adapt))
+
+
+# def adaptProblem(problem, mesh):
+#     print(dir(mesh))
+#     return m.adapt(problem, mesh)
 
 def readMesh(path):
     mesh = Mesh()
@@ -174,7 +206,6 @@ def main():
     (F, J, W, w, w0, wt) = ufl(mesh, boundaries, f, dt, nu, theta)
     bcs = boundaryCondition(mesh, boundaries, W)
     problem = NonlinearVariationalProblem(F, w, bcs, J)
-
     t = 0
     while t <= T:
         for i in range(maxiters):
@@ -214,8 +245,11 @@ def main():
 
             gamma = abs(ei.get_local())
 
-            tmp = Vector(MPI.comm_world, Z.dim())
+            # tmp = Vector(MPI.comm_world, Z.dim())
             tmp = ei.gather_on_zero()
+            # gammaGlobal = MPI.comm_world.bcast(tmp)
+            # print(gammaGlobal)
+            # return
             tmp = abs(tmp)
             gammaGlobal = MPI.comm_world.bcast(tmp)
             # Mark cells for refinement
@@ -224,6 +258,8 @@ def main():
             gamma_0 = sorted(gammaGlobal, reverse=True)[
                 int(len(gammaGlobal)*adapt_ratio) - 1]
 
+            
+
             for c in cells(mesh):
                 cell_markers[c] = gamma[c.index()] > gamma_0
 
@@ -231,7 +267,9 @@ def main():
                 rmesh = refine(mesh, cell_markers, False)
                 # meshdata = mesh.data()
                 # print(meshdata.array("parent_cell", 2))
-                problem = adaptProblem(problem, rmesh)
+                boundaries = adapt(boundaries, rmesh)
+                return 
+                problem = adapt(problem, rmesh)
                 mesh = rmesh  # Shift to next adaptive iteration
             else:
                 break
