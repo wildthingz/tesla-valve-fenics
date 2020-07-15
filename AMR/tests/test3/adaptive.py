@@ -112,7 +112,7 @@ def main():
         psimarker = Expression("x[0] > xmin + eps && x[1] >  ymin + eps && x[0] < xmax - eps && x[1] < ymax - eps ? 1. : 0.",
                                xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, eps=eps, element=Q.ufl_element())
 
-        h = CellDiameter(mesh)  # FEM function
+        h = 0.5 * CellDiameter(mesh)  # FEM function
         gamma = 10*1./h  # Penalty parameter
 
         F = r(W, w, wt, nu, stab=True)
@@ -125,6 +125,8 @@ def main():
         output = assemble(M(mesh, w, nu, psimarker))
         print("adaptive iter: %d num_vertices: %d output: %f err: %f" %
               (i, mesh.num_vertices(), output, abs(ref - output)))
+
+        ref = output
 
         a_dual = adjoint(derivative(F, w))  # Construct the adjoint problem
         L_dual = M(mesh, wt, nu, psimarker)
