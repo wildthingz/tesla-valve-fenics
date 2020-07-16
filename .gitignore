@@ -5,3 +5,6 @@ daniele-test/
 mesh-test/
 mixed/
 navier-stokes-benchmark/
+report/*.aux
+report/*.out
+report/*.log
