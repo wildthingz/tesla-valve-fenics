@@ -1,5 +1,7 @@
 biharmanoic-equation/
 daniele-test/
-mshr-test/
+mesh-test/
+AMR/
+report/
 navier-stokes-benchmark/
 .vscode/
