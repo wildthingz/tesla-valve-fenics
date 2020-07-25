@@ -109,7 +109,7 @@ int main()
     parameters["std_out_all_processes"] = false;
     // Allow approximating values for points that may be generated outside
     // of domain (because of numerical inaccuracies)
-    parameters["allow_extrapolation"] = true;
+    // parameters["allow_extrapolation"] = true;
     parameters["refinement_algorithm"] = "plaza_with_parent_facets";
 
     // Set parameter values
@@ -122,7 +122,7 @@ int main()
     bool adaptive = true;
     double adapt_ratio = 0.03;
     double tol = 1e-6;
-    double maxiters = 20;
+    double maxiters = 22;
     double ref = 0;
 
     // Load mesh from file
@@ -197,19 +197,19 @@ int main()
         fileU << *w;
 
         auto M = opt_func(meshout, w, nu);
-        auto mval = assemble(*M.velocity_field);
+        double mval = assemble(*M.velocity_field);
 
         sprintf(stdout_buffer, "M VALUE: %f, ERORR: %f", mval, abs(ref - mval));
         info(stdout_buffer);
 
-        if (abs(ref - mval) < tol)
-        {
-            info("CONVERGENCE REACHED!");
-            info("--------------------------------------");
-            break;
-        }
+        // if (abs(ref - mval) < tol)
+        // {
+        //     info("CONVERGENCE REACHED!");
+        //     info("--------------------------------------");
+        //     break;
+        // }
 
-        // ref = mval;
+        ref = mval;
 
         auto adjoint_solver = LinearVariationalSolver(adjoint_problem);
         adjoint_solver.solve();
