@@ -9,11 +9,11 @@ from numpy import array
 
 
 def make_mesh(xmin, xmax, ymin, ymax):
-    mresolution = 10
+    mresolution = 9
     G = [xmin, xmax, ymin, ymax]
-    ghole = [0.15, 0.25, 0.15, 0.25]
+    ghole = [0.2,0.2]
     mesh = generate_mesh(Rectangle(Point(G[0], G[2]), Point(
-        G[1], G[3])) - Rectangle(Point(ghole[0], ghole[2]), Point(ghole[1], ghole[3])), mresolution)
+        G[1], G[3])) - Circle(Point(ghole[0], ghole[1]), 0.05, 2*mresolution), mresolution)
     return mesh
 
 
@@ -66,7 +66,7 @@ def r(W, w, wt, nu, stab=True):
 def main():
 
     xmin = 0.
-    xmax = 2.5
+    xmax = 2.2
     ymin = 0
     ymax = 0.41
 
@@ -101,7 +101,7 @@ def main():
         (u, p) = (as_vector((w[0], w[1])), w[2])
         (v, q) = (as_vector((wt[0], wt[1])), wt[2])
 
-        uin = Expression(("4*(x[1]*(ymax-x[1]))/(ymax*ymax)", "0."),
+        uin = Expression(("4*0.3*(x[1]*(ymax-x[1]))/(ymax*ymax)", "0."),
                          ymax=ymax, element=V.ufl_element())  # Inflow velocity
         om = Expression("x[0] > xmax - eps ? 1. : 0.", xmax=xmax, eps=eps,
                         element=Q.ufl_element())  # Mark regions for boundary conditions
@@ -155,7 +155,7 @@ def main():
             "bool", mesh, mesh.topology().dim(), MPI.rank(mesh.mpi_comm()))
         gamma_0 = sorted(gammaGlobal, reverse=True)[
             int(len(gammaGlobal)*adapt_ratio) - 1]
-
+        print(gamma_0)
         for c in cells(mesh):
             cell_markers[c] = gamma[c.index()] > gamma_0
 
