@@ -99,8 +99,8 @@ def ufl(mesh, f, dt, nu, theta):
     return (F, J, W, w, w0)
 
 def main():
-    meshPath = "/content/drive/My Drive/NSE/NS_3Dsphere/mesh/"
-
+    # meshPath = "/content/drive/My Drive/NSE/NS_3Dsphere/mesh/"
+    meshPath = "./mesh/"
     dt = 0.1
     f = Constant((0, 0, 0))
     mu = 0.001
@@ -116,8 +116,9 @@ def main():
     problem = NonlinearVariationalProblem(F, w, bcs, J)
     solver = NonlinearVariationalSolver(problem)
 
-    file = File("/content/drive/My Drive/NSE/NS_3Dsphere/output_sphere/velocity.pvd")
-
+    # file = File("/content/drive/My Drive/NSE/NS_3Dsphere/output_sphere/velocity.pvd")
+    file = File("./results/velocity.pvd")
+    
     values = []
     t = 0
     while t <= T:
@@ -132,7 +133,8 @@ def main():
         info("Current time: {0:1.3f}".format(t))
         t += dt
     
-    np.savetxt("/content/drive/My Drive/NSE/NS_3Dsphere/output_sphere/drag_lift.txt", values, delimiter=",")
+    # np.savetxt("/content/drive/My Drive/NSE/NS_3Dsphere/output_sphere/drag_lift.txt", values, delimiter=",")
+    np.savetxt("./results/drag_lift.txt", values, delimiter=",")
 
     Re = 0.2*0.1/(mu/rho)
 
