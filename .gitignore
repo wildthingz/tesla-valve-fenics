@@ -10,3 +10,6 @@ navier-stokes-benchmark/
 report/*.aux
 report/*.out
 report/*.log
+report/*.fls
+report/*.gz
+report/*.fdb_latexmk
