@@ -1,9 +1,10 @@
-\documentclass[11pt,letterpaper]{amsart}
+\documentclass[11pt, letterpaper]{amsart}
 
 \usepackage[latin1]{inputenc}
 \usepackage[USenglish,british,american,australian,english]{babel}
 \usepackage{amsmath,amssymb,amsfonts,amsthm}
 \usepackage{graphicx}
+\usepackage[T1]{fontenc}
 
 \usepackage{braket}
 \usepackage{mathrsfs}
@@ -11,13 +12,13 @@
 \usepackage{listings}
 \usepackage{lettrine}
 \usepackage{epigraph}
-\usepackage{fancyhdr}
 \usepackage{wrapfig}
 \usepackage{bm}
 \usepackage[font={scriptsize,sl},format=hang,labelfont={sf,bf}]{caption}
 \usepackage[final]{hyperref}
 \usepackage{cite}
 \usepackage[margin=1in,letterpaper]{geometry}
+\usepackage{url}
 
 \newcommand\norm[1]{\left\lVert#1\right\rVert}
 
@@ -25,51 +26,65 @@
 \tolerance=10000
 \hbadness=10000
 
-\title{Tesla valve}
+\title{Simulation of fluid flow in a Tesla valve}
 \author{Hatef Khadivinassab, Daniele Rizzi}
 \date{July 2, 2020}
 
 \begin{document}
 \maketitle
+%---------------CHANGES---------------%
+%07-17 Modified Title, Introduction, Tesla valve
 
 %-----------------------------------------------------------------------------------------------------------------
 \section{Introduction}
-The use of microvalve to move small quantities of fluid has great importance in the field of medicine, such as for example in drug delivery and in cardiology\cite{microvalve}. In these applications, the ability to control and move milli and even micro liters of fluid gains great importance, together with the ability to predict the behavior of the flow inside the valves.
+The use of microvalve to move small quantities of fluid has great importance in medicine, such as for example in drug delivery and in cardiology, in biotechnology, such as for handling biomolecules, and in chemistry\cite{microvalve}\cite{actuator_valves}. In these applications,the ability to control and move milli and micro liters of fluid has great importance, together with the ability to predict the behavior of the flow inside the valves.
 \newline
-Despite the facility of fabrication of many valves, their operation is characterized by the equations of moving fluids, in the form of the Navier-Stokes equation, whose solution is still an open problem in the field of mathematics. To predict the behavior of a moving fluid, a Computational Fluid Dynamics Simulation must be performed, whose aim is to solve numerically the equation of fluid.
+Microvalves may be divided in two major categories, active and passive. Active valves use moving parts such as mechanical moving membranes that are coupled by magnetic, electric, piezoelectric or thermal actuation methods\cite{microvalve}.
+Passive valves are characterized by not having any moving part and their operational state (open or closed) is directly determined by the fluid.
+
+\begin{figure}[!h]
+\centering%
+\subfigure[\label{fig:activevalve}]%
+{\includegraphics[angle=0,width=0.3\linewidth]{active_valve.png}}\qquad\qquad
+\subfigure[\label{fig:passivevalve}]%
+{\includegraphics[angle=0,width=0.3\linewidth]{passive_valve.png}}
+\caption{Functional scheme of active (a) and passive (b) valves. Source \url{https://en.wikipedia.org/wiki/Microvalve}. \label{fig:valves}}
+\end{figure}
+
+Many microvalves have advantages such as low cost, ease of fabrication and scalability, characteristics that contribute to their increasing usage in industry and medicine.
+Despite all these advantages, their operation is characterized by the equations of moving fluids in the form of the Navier-Stokes equation, whose solution is still an open problem in the field of mathematics. To predict the behavior of a moving fluid, a Computational Fluid Dynamics Simulation must be performed, whose aim is to solve numerically the equation of fluids to obtain informations about the flow such as velocity and pressure of the fluid.
 \newline
 In this paper we will analyse and discuss the diodicity of a Tesla valve with a CFD simulation using the open source computing platform FEniCS.
 
 %-----------------------------------------------------------------------------------------------------------------
 \section{Tesla valve}
 One of the first design of micro valves is due to Nikola Tesla who patented a passive valve that allows flow preferentially in one direction, while it prevents flow in the other direction.
-The basic design of this valve consists of channel that is splitted in a Y junction that re-enters in a T channel 
+The basic design of this valve consists of channel that is splitted in a Y junction that re-enters in a T channel.
 This valve has many advantages since it is easy to design, easy to fabricate and it can be scaled with ease.
 
-\begin{figure}[!ht]
+\begin{figure}[!h]
 \begin{centering}
-\includegraphics[angle=0,width=10cm]{tesla-valve.png}
+\includegraphics[angle=0,width=0.5\linewidth]{tesla-valve.png}
 \par\end{centering}
-\caption{Tesla valve design used for this simulation.}
+\caption{Tesla valve design used for this simulation}
 \label{fig:tesla-valve}
 \end{figure}
 
-Such a valve, named after its inventor, is structured to have a higher pressure drop for the flow in one direction (reverse) than the other (forward). This difference in flow resistance causes a net directional flow rate in the forward direction in oscillating flows. The efficiency is often expressed in diodicity $D_i$, defined as the ratio of pressure drops for identical flow rates
+\begin{figure}[!h]
+\begin{centering}
+\includegraphics[angle=0,width=0.5\linewidth]{tesla_flow.png}
+\par\end{centering}
+\caption{Flow in a tesla valve in forward (a) and reverse (b) direction\cite{tesla_valve}}
+\label{fig:tesla-flow}
+\end{figure}
+
+Such a valve, named after its inventor, is structured to have a higher pressure drop for the flow in one direction (reverse) than the other (forward). This difference in flow resistance causes a net directional flow rate in the forward direction in oscillating flows. The efficiency is often expressed in terms of the diodicity $D_i$, defined as the ratio of pressure drops for identical flow rates
 
 \begin{equation}
 D_i = \left({\frac {\Delta p_{r}}{\Delta p_{f}}}\right)_{Q}
 \end{equation}
 
 where $\Delta p_{r}$ is the reverse flow pressure drop and $\Delta p_{f}$ the forward flow pressure drop for flow rate.
-
-\begin{figure}
-\begin{centering}
-\includegraphics[angle=0,width=6cm]{tesla_flow.png}
-\par\end{centering}
-\caption{Flow in a tesla valve in forward (a) and reverse (b) direction\cite{tesla_valve}}
-\label{fig:tesla-flow}
-\end{figure}
-
 Since the diodicity of such valve depends on the pressure drop between direct flow versus the reverse flow, higher diodicity values may be obtained by changing geometrical parameters of this type of valve, such as
 
 \begin{itemize}
@@ -78,8 +93,7 @@ Since the diodicity of such valve depends on the pressure drop between direct fl
 \item number of branches of the valve
 \end{itemize}
 
-ADD COMMENT ABOUT SIMULATION.
-
+\bigskip
 %-----------------------------------------------------------------------------------------------------------------
 \section{Problem definition}
 The flow equations are the Navier Stokes equations for incompressible flow, which in the weak form can be stated as
@@ -101,7 +115,7 @@ F = \left(\frac{u - u_0}{dt}, v \right) + \left(\nabla u_m \cdot u_m, v \right) 
 
 where $u_m = \theta u + (1-\theta) u_0$ with $\theta = 0.5$ in the Crank-Nicholson scheme.
 
-\subsection{Stabilization method}
+\subsection{Stabilization methods}
 
 It is well known that the numerical solution of Navier-Stokes equations using Finite Element Methods suffers from two sources of numerical instabilities\cite{tezduyar}\cite{tezduyar2}
 
@@ -120,7 +134,7 @@ These sources of instabilities may be controlled in two ways
 \end{itemize}
 
 The first item can be addressed by using a $P_k$-$P_k+1$ combination of spaces for the unknown fields velocity and pressure.
-Such mixed formulation is expressed in FEniCS in the following
+Such mixed formulation is expressed in FEniCS with the following lines of code, in which the Vector Element space $Q_e = P_1$ for the pressure and the space $V_e = P_2$ for the velocity and mixed in the space $W = V_e Q_e = P_k P_{k+1} = P_1 P_2$.
 
 \bigskip
 \begin{verbatim}
@@ -135,10 +149,6 @@ Such mixed formulation is expressed in FEniCS in the following
     w0 = Function(W)
     u0, _ = split(w0)
 \end{verbatim}
-\bigskip
-
-in which the Vector Element space $Q_e = P_1$ for the pressure and the space $V_e = P_2$ for the velocity and mixed in the space $W = V_e Q_e = P_k P_{k+1} = P_1 P_2$.
-
 \bigskip
 
 The second way to reduce numerical instabilities is to add to the weak formulation a stabilization term as expressed in \cite{tezduyar}, \cite{tezduyar2} and \cite{jansson_aircraft}. In our formulation the stabilization term is the following 
@@ -157,12 +167,35 @@ in which $h$ is defined as the mean mesh cell diameter.
 
 %-----------------------------------------------------------------------------------------------------------------
 \section{Geometry}
+The Tesla valve has been designed following the geometry provided in \cite{gamboa_valve}, with the following dimensions
+\textbf{ADD DIMENSIONS}
 
+\begin{figure}[!h]
+\begin{centering}
+\includegraphics[angle=0,width=8cm]{tesla_geometry.png}
+\par\end{centering}
+\caption{Design of tesla valve provided in  \cite{gamboa_valve}}
+\label{fig:tesla-geometry}
+\end{figure}
 
 %-----------------------------------------------------------------------------------------------------------------
 \section{Software}
 The CAD geometry has been designed using OnShape whose 3D step file has been imported into GmSH to define the mesh and surface boundaries.
 The calculations are performed using FEniCS open source computing platform and Paraview for the visualization of the results.
+
+%-----------------------------------------------------------------------------------------------------------------
+\section{Numerical simulation}
+The simulation is performed by evaluating the flow of a fluid with viscosity $\nu = $.
+The inlet velocity is assumed to have velocity only along the x-axis with a parabolic profile with the following shape
+
+\begin{equation}
+v_{in} = \frac{4U y\left( R-y \right) z\left(R-z \right)}{R^4}
+\end{equation}
+
+where $R$ is the radius of the conduct and $U$ is the maximum value of the velocity profile.
+Velocity components along y and z are supposed to have zero value.
+Dirichlet no-slip condition is applied on the walls of the valve.
+
 
 %-----------------------------------------------------------------------------------------------------------------
 \section{Results and discussion}
@@ -175,7 +208,8 @@ The calculations are performed using FEniCS open source computing platform and P
 \begin{thebibliography}{99}
 \bibitem{microvalve}
 	Kwang, Chong,emph{A review of microvalves}, J. Micromech. Microeng. $16$ $(2006)$
-\bibitem{tesla_valve}
+\bibitem{actuator_valves}
+	Jin-Yuan Qian, Cong-Wei Hou, Xiao-Juan Li and Zhi-Jiang Jin, \emph{Actuation Mechanism of Microvalves: A Review}, Micromachines $2020$, $11$, $172$\bibitem{tesla_valve}
 	A. Y. Nobakht, M. Shahsavan, A. Paykani,
 	\emph{Numerical Study of Diodicity Mechanism in Different Tesla-Type Microvalves}, Journal of Applied Research and Technology, Vol.$11$, December $2013$
 \bibitem{tezduyar}
@@ -193,6 +227,9 @@ The calculations are performed using FEniCS open source computing platform and P
 \bibitem{fenics_book}
 	A. Logg, K. A. Mardal, G. N. Wells,
 	\emph{Automated Solution of Differential Equations by the Finite Element Method}, Springer $2017$
+\bibitem{gamboa_valve}
+	A. Gamboa, C. Morris, F. Foster,
+	\emph{Improvements in Fixed-Valve Micropump Performance Through Shape Optimization of Valves}, Journal of Fluids Engineering, March $2005$, Vol. $127$
 \end{thebibliography}
 
 \end{document}
