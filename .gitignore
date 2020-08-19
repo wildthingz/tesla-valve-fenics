@@ -13,3 +13,6 @@ report/*.log
 report/*.fls
 report/*.gz
 report/*.fdb_latexmk
+report/*.pyg
+report/*.spl
+report/*.pytxcode
