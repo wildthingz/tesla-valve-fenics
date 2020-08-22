@@ -159,14 +159,14 @@ int main()
     int timesteps_saved = 100;
     int save_every = ((T / dt) / timesteps_saved) == 0 ? 1 : (T / dt) / timesteps_saved;
     auto problem = std::make_shared<NonlinearVariationalProblem>(F, w, bcs, J);
-    NonlinearVariationalSolver solver(problem);
+    auto solver = NonlinearVariationalSolver(problem);
 
     // snes solver -- comment out to use newton solver
-    //solver.parameters["nonlinear_solver"] = "snes";
-    //solver.parameters("snes_solver")["line_search"] = "bt";
-    //solver.parameters("snes_solver")["linear_solver"] = "mumps";
-    //solver.parameters("snes_solver")["preconditioner"] = "hypre_amg";
-    //solver.parameters("snes_solver")["report"] = true;
+    solver.parameters["nonlinear_solver"] = "snes";
+    solver.parameters("snes_solver")["line_search"] = "bt";
+    solver.parameters("snes_solver")["linear_solver"] = "mumps";
+    solver.parameters("snes_solver")["preconditioner"] = "hypre_amg";
+    solver.parameters("snes_solver")["report"] = true;
 
     char time_stdout_buffer[50];
 
