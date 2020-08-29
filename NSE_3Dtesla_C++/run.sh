@@ -2,7 +2,7 @@
 # to compile and run: ./run.sh -c
 # to just run       : ./run.sh
 
-PROJECT_NAME="mixed-benchmark"
+PROJECT_NAME="nse"
 
 ## if -c is provided change the project in cmakelists to $PROJECT_NAME
 [ "$1" == "-c" ] &&
