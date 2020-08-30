@@ -16,3 +16,6 @@ report/*.fdb_latexmk
 report/*.pyg
 report/*.spl
 report/*.pytxcode
+
+src/cpp/build
+src/cpp/results

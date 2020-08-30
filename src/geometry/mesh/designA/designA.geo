@@ -1,4 +1,4 @@
-Merge "designA.step";
+Merge "../../step-files/designA.step";
 Physical Volume("domain") = {1};
 //+
 Physical Surface("inlet") = {3};
