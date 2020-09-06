@@ -29,11 +29,11 @@ public:
 MeshOut get_mesh()
 {
     auto mesh = std::make_shared<Mesh>();
-    XDMFFile initialmeshfile(MPI_COMM_WORLD, "../../geometry/mesh/designB/domain.xdmf");
+    XDMFFile initialmeshfile(MPI_COMM_WORLD, "../../geometry/mesh/designB-reverse/domain.xdmf");
     initialmeshfile.read(*mesh);
 
     MeshValueCollection<std::size_t> mf_mvc(mesh, 2);
-    XDMFFile initialmffile(MPI_COMM_WORLD, "../../geometry/mesh/designB/boundaries.xdmf");
+    XDMFFile initialmffile(MPI_COMM_WORLD, "../../geometry/mesh/designB-reverse/boundaries.xdmf");
     initialmffile.read(mf_mvc, "boundaries");
     auto boundaries = std::make_shared<MeshFunction<std::size_t>>(mesh, mf_mvc);
 
