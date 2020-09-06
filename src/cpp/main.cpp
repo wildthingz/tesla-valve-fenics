@@ -20,7 +20,7 @@ public:
     // Evaluate velocity at inflow
     void eval(Array<double> &values, const Array<double> &x) const
     {
-        values[0] = 5 * (1 - 4 * x[2] * x[2] - 4 * x[1] * x[1]);
+        values[0] = 5.0 * (1 - 4 * x[2] * x[2] - 4 * x[1] * x[1]);
         values[1] = 0;
         values[2] = 0;
     }
@@ -29,11 +29,11 @@ public:
 MeshOut get_mesh()
 {
     auto mesh = std::make_shared<Mesh>();
-    XDMFFile initialmeshfile(MPI_COMM_WORLD, "../../geometry/mesh/designA/domain.xdmf");
+    XDMFFile initialmeshfile(MPI_COMM_WORLD, "../../geometry/mesh/designB/domain.xdmf");
     initialmeshfile.read(*mesh);
 
     MeshValueCollection<std::size_t> mf_mvc(mesh, 2);
-    XDMFFile initialmffile(MPI_COMM_WORLD, "../../geometry/mesh/designA/boundaries.xdmf");
+    XDMFFile initialmffile(MPI_COMM_WORLD, "../../geometry/mesh/designB/boundaries.xdmf");
     initialmffile.read(mf_mvc, "boundaries");
     auto boundaries = std::make_shared<MeshFunction<std::size_t>>(mesh, mf_mvc);
 
@@ -58,9 +58,9 @@ int main()
 
     // Set parameter values
     double dt = 0.05;
-    double T = 30;
+    double T = 10;
     double mu = 0.001;
-    double rho = 997;
+    double rho = 1;
     // Crank-Nicholson
     double theta = 0.5;
 

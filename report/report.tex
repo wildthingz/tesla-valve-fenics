@@ -94,7 +94,7 @@ In this paper we will analyse and discuss the diodicity of two Tesla microvalve 
 \section{Methodology}
 \subsection{Geometry}
 \subsubsection{Design}
-The Tesla valves were designed following the instructions provided in \cite{gamboa_valve}. The design variables are shown in Figure \ref{fig:tesla-geometry}. 
+The Tesla valves were designed following the instructions provided in \cite{gamboa_valve}. The design variables are shown in Figure \ref{fig:tesla-geometry}.
 
 \begin{figure}[!h]
 	\begin{centering}
@@ -110,11 +110,11 @@ Respective dimensions for designs A (Figure \ref{fig:tesla-valveA}) and B (Figur
 	\centering
 	\caption{Dimension for different Tesla valve designs}
 	\begin{tabular}{c c c c c c c c c}
-		name & ${W_y}^{[mm]}$ & $n$ & $Y3^{[mm]}$ & $X2^{[mm]}$ & $R^{[mm]}$ & $BETA^{[\circ]}$ & $ALPHA^{[\circ]}$ & $LENOUT^{[mm]}$ \\
+		name     & ${W_y}^{[mm]}$ & $n$   & $Y3^{[mm]}$ & $X2^{[mm]}$ & $R^{[mm]}$ & $BETA^{[\circ]}$ & $ALPHA^{[\circ]}$ & $LENOUT^{[mm]}$ \\
 		\hline \hline
-		Design A & 1 & 0.990 & 0.600 & 1.5 & 2.50 & 8.53 & 45.0 & 2.00 \\ 
+		Design A & 1              & 0.990 & 0.600       & 1.5         & 2.50       & 8.53             & 45.0              & 2.00            \\
 		\hline
-		Design B & 1 & 0.797 & 0.608 & 1.6 & 2.35 & 71.1 & 41.9 & 2.94 \\ 
+		Design B & 1              & 0.797 & 0.608       & 1.6         & 2.35       & 71.1             & 41.9              & 2.94            \\
 		\specialrule{.1em}{.05em}{.05em}
 	\end{tabular}
 	\label{table:dimensions}
@@ -124,9 +124,9 @@ Respective dimensions for designs A (Figure \ref{fig:tesla-valveA}) and B (Figur
 \begin{figure}[!h]
 	\centering
 	\subfigure[\label{fig:tesla-valveA}]
-		{\includegraphics[angle=0,width=0.45\linewidth]{designA.png}}
+	{\includegraphics[angle=0,width=0.45\linewidth]{designA.png}}
 	\subfigure[\label{fig:tesla-valveB}]
-		{\includegraphics[angle=0,width=0.45\linewidth]{designB.png}}
+	{\includegraphics[angle=0,width=0.45\linewidth]{designB.png}}
 	\caption{Tesla valve design A (a) and design B (b) used for this simulation.}
 \end{figure}
 
@@ -136,9 +136,9 @@ The meshed geometries for design A and design B are shown in Figures \ref{fig:me
 \begin{figure}[!h]
 	\centering
 	\subfigure[\label{fig:meshdesignA}]
-		{\includegraphics[angle=0,width=0.45\linewidth]{mesh-designA.png}}
+	{\includegraphics[angle=0,width=0.45\linewidth]{mesh-designA.png}}
 	\subfigure[\label{fig:meshdesignB}]
-		{\includegraphics[angle=0,width=0.45\linewidth]{mesh-designB.png}}
+	{\includegraphics[angle=0,width=0.45\linewidth]{mesh-designB.png}}
 	\caption{Tesla valve mesh for design A (a) and design B (b) used for this simulation.}
 \end{figure}
 
@@ -146,11 +146,11 @@ The meshed geometries for design A and design B are shown in Figures \ref{fig:me
 	\centering
 	\caption{Mesh statistics for designs A and B.}
 	\begin{tabular}{c c c c}
-		name & Nodes & Triangles & Tetrahedra \\
+		name     & Nodes & Triangles & Tetrahedra \\
 		\hline \hline
-		Design A & 11680 & 11576 & 51832 \\ 
+		Design A & 11680 & 11576     & 51832      \\
 		\hline
-		Design B & 12445 & 12552 & 54848 \\ 
+		Design B & 12445 & 12552     & 54848      \\
 		\specialrule{.1em}{.05em}{.05em}
 	\end{tabular}
 	\label{table:meshstats}
@@ -231,21 +231,21 @@ The inlet velocity is assumed to have velocity only along the x-axis with a para
 
 \noindent where $R$ is the radius of the conduct and $U$ is the maximum value of the velocity profile.
 Velocity components along y and z are supposed to have zero values.
-Dirichlet no-slip condition is applied on the walls of the valve and the outlet is assumed to discharge to atmospheric pressure. 
+Dirichlet no-slip condition is applied on the walls of the valve and the outlet is assumed to discharge to atmospheric pressure.
 
-\subsubsection{Benchmark Problem}
-\textcolor{red}{\textbf{\textsc{not complete}}}
+% \subsubsection{Benchmark Problem}
+% \textcolor{red}{\textbf{\textsc{not complete}}}
 
-\begin{itemize}
-	\item explain 2d flow in around a cylinder
-	\item Material/parameters
-	\item what are we benchmarking
-\end{itemize}
+% \begin{itemize}
+% 	\item explain 2d flow in around a cylinder
+% 	\item Material/parameters
+% 	\item what are we benchmarking
+% \end{itemize}
 
 \subsubsection{Numerical Analysis}
-In order to characterize the diodicity of the tesla valves, three flow cases with different inlet velocities are considered. The velocity profile for these cases are as shown on Eq \ref{eq:inlet-velocity} Three maximum velocities are, $0.3 m/s$, $1.5 m/s$ and $5 m/s$. Diodicity is then calculated using Eq \ref{eq:diodicity}.
+In order to characterize the diodicity of the tesla valves, three flow cases with different inlet velocities are considered. The velocity profile for these cases are as shown on Eq \ref{eq:inlet-velocity} Three maximum velocities are, $0.3 m/s$, $1.5 m/s$ and $5 m/s$. Simulations are run until steady state is reached. Diodicity is then calculated using Eq \ref{eq:diodicity}.
 
-The material used in the simulation is water with density of $997 kg/m^3$ and dynamic viscosity of $0.001Pa.s$.
+The material used in the simulation is water with density of $1000 kg/m^3$ and dynamic viscosity of $0.001Pa.s$. The code does not have any understanding of the geometrical scale, thus it assumes $m$ units. In order to scale down the geometry to $mm$ level we instead scaled down the density by a factor of $1000$. Utilizing this method we ensure that the Reynolds number stays the same. 
 
 %-----------------------------------------------------------------------------------------------------------------
 \section{Software Workflow}
@@ -255,17 +255,95 @@ The calculations are performed using FEniCS open source computing platform. Para
 
 %-----------------------------------------------------------------------------------------------------------------
 \section{Results and discussion}
-\textcolor{red}{\textbf{\textsc{not complete}}}
+Each simulation, ran on 5 parallel threads, took on average 1 hour to calculate up to 30 seconds of in-simulation time using an Intel i7-7820HK (8) @ 3.900GHz CPU.
 
-\begin{itemize}
-	\item flow results
-	\item pressure results
-	\item diodicity discussion and comparison
-\end{itemize}
+The velocity profiles at steady state are shown in figures \ref{fig:designA-v3-vel} to \ref{fig:designB-v5-vel}. Diodicity values for each case is tabulated in table \ref{table:diodicty}.
 
+\begin{figure}[!h]
+	\centering
+	\subfigure[\label{fig:designA-v3}]
+	{\includegraphics[angle=0,width=0.45\linewidth]{designA-v3.png}}
+	\subfigure[\label{fig:designA-reverse-v3}]
+	{\includegraphics[angle=0,width=0.45\linewidth]{designA-reverse-v3.png}}
+	\caption{Velocity results for design A with $U=0.3 m/s$ with forward flow (a) and reverse flow (b).}
+	\label{fig:designA-v3-vel}
+\end{figure}
+
+\begin{figure}[!h]
+	\centering
+	\subfigure[\label{fig:designA-v15}]
+	{\includegraphics[angle=0,width=0.49\linewidth]{designA-v15.png}}
+	\subfigure[\label{fig:designA-reverse-v15}]
+	{\includegraphics[angle=0,width=0.5\linewidth]{designA-reverse-v15.png}}
+	\caption{Velocity results for design A with $U=1.5 m/s$ with forward flow (a) and reverse flow (b).}
+	\label{fig:designA-v15-vel}
+\end{figure}
+
+\begin{figure}[!h]
+	\centering
+	\subfigure[\label{fig:designA-v5}]
+	{\includegraphics[angle=0,width=0.49\linewidth]{designA-v5.png}}
+	\subfigure[\label{fig:designA-reverse-v5}]
+	{\includegraphics[angle=0,width=0.5\linewidth]{designA-reverse-v5.png}}
+	\caption{Velocity results for design A with $U=5 m/s$ with forward flow (a) and reverse flow (b).}
+	\label{fig:designA-v5-vel}
+\end{figure}
+
+\begin{figure}[!h]
+	\centering
+	\subfigure[\label{fig:designB-v3}]
+	{\includegraphics[angle=0,width=0.49\linewidth]{designB-v3.png}}
+	\subfigure[\label{fig:designB-reverse-v3}]
+	{\includegraphics[angle=0,width=0.5\linewidth]{designB-reverse-v3.png}}
+	\caption{Velocity results for design B with $U=0.3 m/s$ with forward flow (a) and reverse flow (b).}
+	\label{fig:designB-v3-vel}
+\end{figure}
+
+\begin{figure}[!h]
+	\centering
+	\subfigure[\label{fig:designB-v15}]
+	{\includegraphics[angle=0,width=0.49\linewidth]{designB-v15.png}}
+	\subfigure[\label{fig:designB-reverse-v15}]
+	{\includegraphics[angle=0,width=0.5\linewidth]{designB-reverse-v15.png}}
+	\caption{Velocity results for design B with $U=1.5 m/s$ with forward flow (a) and reverse flow (b).}
+	\label{fig:designB-v15-vel}
+\end{figure}
+
+\begin{figure}[!h]
+	\centering
+	\subfigure[\label{fig:designB-v5}]
+	{\includegraphics[angle=0,width=0.49\linewidth]{designB-v5.png}}
+	\subfigure[\label{fig:designB-reverse-v5}]
+	{\includegraphics[angle=0,width=0.5\linewidth]{designB-reverse-v5.png}}
+	\caption{Velocity results for design B with $U=5 m/s$ with forward flow (a) and reverse flow (b).}
+	\label{fig:designB-v5-vel}
+\end{figure}
+
+
+\begin{table}[!h]
+	\centering
+	\caption{Diodicity values for designs A and B at different inlet velocities.}
+	\begin{tabular}{c c c c}
+		name     & $U=0.3m/s$ & $U=1.5m/s$ & $U=5m/s$ \\
+		\hline \hline
+		Design A & 1.0061 & 1.2807     & 1.3796      \\
+		\hline
+		Design B & 1.0079 & 1.1429     & 1.3731      \\
+		\specialrule{.1em}{.05em}{.05em}
+	\end{tabular}
+	\label{table:diodicty}
+\end{table}
+
+%------------------------
+\section{Conclusions and Future Work}
+
+Authors believe a comprehensive sensitivity analysis on tesla valve design would be beneficial to understand how these parameters affect the diodicity. Moreover, at micro scales capillary forces become very important in characterizing the flow. The authors would like to investigate the effects of such forces.
+
+It would also be interesting to utilize Fenics' automated mesh refinement on this case to reduce simulation time.
 
 
 %-----------------------------------------------------------------------------------------------------------------
+\pagebreak[2]
 \begin{thebibliography}{99}
 	\bibitem{microvalve}
 	Kwang, Chong,emph{A review of microvalves}, J. Micromech. Microeng. $16$ $(2006)$

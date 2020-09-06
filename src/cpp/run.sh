@@ -22,13 +22,13 @@ ffc -l dolfin *.ufl
 mkdir build && cd build && cmake .. && make && cd ..
 
 ## delete results folder if exists
-[ -d "results2" ] && rm -rf results2
+[ -d "results" ] && rm -rf results
 
 ## move results to a different folder
 # [ -d "results" ] && mv results results.old
 
 ## make results folder and run the executable
-mkdir results2 && cd results2
+mkdir results && cd results
 echo "localhost slots=10" > hostfile
 export OMP_NUM_THREADS=1
 mpirun --hostfile hostfile -n 6 ../build/$PROJECT_NAME
