@@ -71,7 +71,7 @@ The basic design of this valve consists of channel that is split in a Y junction
 	\label{fig:tesla-flow}
 \end{figure}
 
-Such a valve, is structured to have a higher pressure drop for the flow in one direction (reverse) than the other (forward). This difference in flow resistance causes a net directional flow rate in the forward direction in oscillating flows. The efficiency is often expressed in terms of the diodicity $D_i$, defined as the ratio of pressure drops for identical flow rates
+Such a valve, is structured to have a higher pressure drop for the flow in one direction (reverse) than the other (forward). This difference in flow resistance causes a net directional flow rate in the forward direction in oscillating flows. The efficiency is expressed in terms of the diodicity $D_i$, defined as the ratio of pressure drops for identical flow rates
 
 \begin{equation}
 	D_i = \left({\frac {\Delta p_{r}}{\Delta p_{f}}}\right)_{Q}
@@ -211,7 +211,7 @@ The second way to reduce numerical instabilities is to add to the weak formulati
 	F_{stabilization} = \tau \left[\left(\nabla p + \nabla u_m \cdot u_m - f, \nabla q + \nabla v \cdot u_ m \right) + \left(\nabla \cdot u_m, \nabla \cdot v\right)\right]
 \end{equation}
 
-where $\tau = h$ is the stabilization parameter, where $h$ is the mean mesh cell diameter.
+where $\tau = h$ is the stabilization parameter, with $h$ the mean mesh cell diameter.
 
 %\begin{equation}%Alternative formulation for the stabilization parameter
 %	\tau = \left[\left(\frac{2}{dt} \right)^2 + \left(\frac{2 \norm{u}}{h} \right)^2  \left(\frac{4 \nu}{h^2} \right)^2   \right]^{(-0.5)}
@@ -254,12 +254,14 @@ The calculations are performed using FEniCS open source computing platform. Para
 Each simulation, ran on 5 parallel threads, took on average 1 hour to calculate up to 30 seconds of in-simulation time using an Intel i7-7820HK (8) @ 3.900GHz CPU.
 
 The velocity profiles at steady state are shown in figures \ref{fig:designA-v3-vel} to \ref{fig:designB-v5-vel}. Diodicity values for each case is tabulated in table \ref{table:diodicity}.
+
+
+As it can be seen by comparing the velocity profiles of forward (figures on the left) and reverse flow (figures on the right), in all the simulated cases velocity fields of forward and reverse flow are significantly different.
 \newline
-As it can be seen by comparing the velocity profiles of forward (pictures on the left) and reverse flow (pictures on the right), in all the simulated cases velocity fields of forward and reverse flow are significantly different.
+In the forward flow simulations (figures on the left), the fluid inside the Tesla microvalve is accelerated from the inlet to the outlet. Some of the fluid goes into the side channel when reaching the T-junction which contributes to a reduction in the diodicity.
 \newline
-In the forward flow simulations, the fluid inside the Tesla microvalve is accelerated from the inlet to the outlet. Some of the fluid goes into the side channel when reaching the T-junction which contributes to the reduction in the diodicity.
-On the other hand, in the reverse flow simulations the fluid is again accelerated at the inlet but it is splitted in the main and side channel when reaching the Y junction. The main and side flows then continue until they reach the T-junction, when the side flow is re-injected in the main channel. This stage is very important in the evaluation of the diodicity of the valve, since when the side flow is injected in the main one, it contributes to obstacle the main flow and increase the pressure drop between the inlet and the outlet of the valve.
-Since the diodicity is defined as the ratio between the pressure drop of the reverse flow over the pressure drop of the forward flow, when the reverse pressure drop increases, the diodicity increases too.
+On the other hand, in the reverse flow simulations (figures on the right) the fluid is again accelerated at the inlet but it is splitted in the main and side channel when reaching the Y junction. The main and side flows then continue until they reach the T-junction, when the side flow is re-injected in the main channel. This stage is very important in the evaluation of the diodicity of the valve; when the side flow is injected in the main one, it contributes to obstacle the main flow and generates an increase in the pressure drop between the inlet and the outlet of the valve.
+Due to the definition of the diodicity as the ratio between the pressure drop of the reverse flow over the pressure drop of the forward flow, when the reverse pressure drop increases, the diodicity increases too.
 
 \subsection{Diodicity versus inlet velocity}
 The effect of the inlet velocity on the diodicity is visible in table \ref{table:diodicity}. As it can be seen by comparing the results at the three different inlet velocities taken into account in the simulation, the diodicity of the same Tesla valve increases with the inlet velocity.
@@ -267,10 +269,12 @@ The effect of the inlet velocity on the diodicity is visible in table \ref{table
 This effect can be explained by comparing the different behavior of the reverse flow at different inlet velocities.
 In the case of reverse flow, the flow is splitted in the side and main channel when reaching the Y-junction. 
 At inlet velocity $0.3 m/s$, we can see the the flow is splitted equally in the side and main channel.
-When the inlet velocity increases ($1.5 m/s$ and $5.0 m/s$), more fluid is drained into the side channel with respect to the main channel; in this condition, when the side flow is re-injected in the main channel, it opposes to the main flow with the effect of increasing the pressure drop. By definition of the diodicity \ref{eq:diodicity}, the increase in the reverse pressure drop causes an increase in the diodicity value.
+When the inlet velocity increases ($1.5 m/s$ and $5.0 m/s$), an higher volume of fluid is drained into the side channel with respect to the main channel; in this condition, when the side flow is re-injected in the main channel, it opposes to the main flow with the effect of increasing the pressure drop. By definition of the diodicity \ref{eq:diodicity}, the increase in the reverse pressure drop causes an increase in the diodicity.
 
 \subsection{Diodicity versus valve geometry}
-When the geometry of the Tesla valve is modified, this has an important effect on the diodicity too. As one can imagine, when the angle of the T-junction, defined as BETA in figure \ref{fig:tesla-geometry}, is increased from the value $8.53°$ of Design A to $71.1°$ of Design B, the side flow is expected to be more opposed to the main flow causing higher reverse pressure drops in Design B with respect to Design A. However, as reported in table \ref{table:diodicity}, the authors found that the diodicity values are the same in the case of inlet velocity $0.3 m/s$, while they are even lower in the case of Design B with respect to Design A. This effect can be explained by the presence of flaws in the model implemented in the simulation, such as the absence of effects important when studying the flow in micro channels, or in the design that should be studied by evaluating the diodicity in other tesla valves.
+The geometry of the Tesla microvalve has an important effect on the diodicity too. In this project we simulated the different flow of a Tesla microvalve in which the angle BETA (defined in figure \ref{fig:tesla-geometry}) has been increased from the value $8.53°$ of Design A to $71.1°$ of Design B.
+As one can imagine, when the angle of the T-junction is increased, the side flow is expected to be more opposed to the main flow causing higher reverse pressure drops in Design B with respect to Design A. However, as reported in table \ref{table:diodicity}, we found that the diodicity values of Design A and B are the same in the case of inlet velocity $0.3 m/s$, and at inlet velocities $1.5 m/s$ and $5.0 m/s$ they are even lower in the case of Design B with respect to Design A. 
+This unexpected result could be explained by the presence of flaws in the model implemented in the simulation, which does not take into account capillarity, a physical effect important when studying the behavior of fluids in micro channels, or flaws in the design that should be studied deeper by evaluating the diodicity in other Tesla valve designs.
 
 
 \begin{table}[!ht]
@@ -291,9 +295,11 @@ When the geometry of the Tesla valve is modified, this has an important effect o
 	\begin{centering}
 		\includegraphics[angle=0,width=0.8\linewidth]{diodicity_chart.png}
 		\par\end{centering}
-	\caption{Diodicity values of Design A and Design B Tesla Valves at different inlet velocities.}
+	\caption{Diodicity values of Design A and Design B Tesla microvalves at different inlet velocities.}
 	\label{fig:diodicity_chart}
 \end{figure}
+
+\newpage
 
 \begin{figure}[!ht]
 	\centering
@@ -324,6 +330,8 @@ When the geometry of the Tesla valve is modified, this has an important effect o
 	\caption{Velocity results for design A with $U=5 m/s$ with forward flow (a) and reverse flow (b).}
 	\label{fig:designA-v5-vel}
 \end{figure}
+
+\newpage
 
 \begin{figure}[!ht]
 	\centering
@@ -358,7 +366,11 @@ When the geometry of the Tesla valve is modified, this has an important effect o
 \newpage
 %------------------------
 \section{Conclusions and Future Work}
-Authors believe a comprehensive sensitivity analysis on Tesla Valve design would be beneficial to understand how these parameters affect the diodicity. Moreover, at micro scales capillary forces become very important in characterizing the flow. The authors would like to investigate the effects of such forces.
+In our work we simulated the behavior of flow in a Tesla microvalve. We then evaluated the impact of the inlet velocity and of the different Tesla valve design on the diodicity.
+\newline
+As a result we found that the diodicity of the Tesla valve increases with the inlet velocity. On the contrary, we found that the effect of the different Tesla valve geometry results in unexpected diodicity values.
+
+We believe a comprehensive sensitivity analysis on Tesla Valve design would be beneficial to understand how these parameters affect the diodicity. Moreover, at micro scales capillary forces become very important in characterizing the flow. We would like to investigate the effects of such forces.
 
 It would also be interesting to utilize Fenics' automated mesh refinement on this case to reduce simulation time.
 
