@@ -35,8 +35,6 @@
 
 \begin{document}
 \maketitle
-%---------------CHANGES---------------%
-%07-17 Modified Title, Introduction, Tesla valve
 
 %-----------------------------------------------------------------------------------------------------------------
 \section{Introduction}
@@ -213,13 +211,11 @@ The second way to reduce numerical instabilities is to add to the weak formulati
 	F_{stabilization} = \tau \left[\left(\nabla p + \nabla u_m \cdot u_m - f, \nabla q + \nabla v \cdot u_ m \right) + \left(\nabla \cdot u_m, \nabla \cdot v\right)\right]
 \end{equation}
 
-where $\tau$ is the stabilization parameter defined as
+where $\tau = h$ is the stabilization parameter, where $h$ is the mean mesh cell diameter.
 
-\begin{equation}
-	\tau = \left[\left(\frac{2}{dt} \right)^2 + \left(\frac{2 \norm{u}}{h} \right)^2  \left(\frac{4 \nu}{h^2} \right)^2   \right]^{(-0.5)}
-\end{equation}
-
-in which $h$ is defined as the mean mesh cell diameter.
+%\begin{equation}%Alternative formulation for the stabilization parameter
+%	\tau = \left[\left(\frac{2}{dt} \right)^2 + \left(\frac{2 \norm{u}}{h} \right)^2  \left(\frac{4 \nu}{h^2} \right)^2   \right]^{(-0.5)}
+%\end{equation}
 
 \subsubsection{Boundary Condition}
 The inlet velocity is assumed to have velocity only along the x-axis with a paraboloid profile with the following shape:
@@ -245,7 +241,7 @@ Dirichlet no-slip condition is applied on the walls of the valve and the outlet 
 \subsubsection{Numerical Analysis}
 In order to characterize the diodicity of the tesla valves, three flow cases with different inlet velocities are considered. The velocity profile for these cases are as shown on Eq \ref{eq:inlet-velocity} Three maximum velocities are, $0.3 m/s$, $1.5 m/s$ and $5 m/s$. Simulations are run until steady state is reached. Diodicity is then calculated using Eq \ref{eq:diodicity}.
 
-The material used in the simulation is water with density of $1000 kg/m^3$ and dynamic viscosity of $0.001Pa.s$. The code does not have any understanding of the geometrical scale, thus it assumes $m$ units. In order to scale down the geometry to $mm$ level we instead scaled down the density by a factor of $1000$. Utilizing this method we ensure that the Reynolds number stays the same. 
+The material used in the simulation is water with density of $1000 kg/m^3$ and dynamic viscosity of $0.001Pa.s$. The code does not have any understanding of the geometrical scale, thus it assumes $m$ units. In order to scale down the geometry to $mm$ level we instead scaled down the density by a factor of $1000$. Utilizing this method we ensure that the Reynolds number stays the same.
 
 %-----------------------------------------------------------------------------------------------------------------
 \section{Software Workflow}
@@ -257,70 +253,27 @@ The calculations are performed using FEniCS open source computing platform. Para
 \section{Results and discussion}
 Each simulation, ran on 5 parallel threads, took on average 1 hour to calculate up to 30 seconds of in-simulation time using an Intel i7-7820HK (8) @ 3.900GHz CPU.
 
-The velocity profiles at steady state are shown in figures \ref{fig:designA-v3-vel} to \ref{fig:designB-v5-vel}. Diodicity values for each case is tabulated in table \ref{table:diodicty}.
+The velocity profiles at steady state are shown in figures \ref{fig:designA-v3-vel} to \ref{fig:designB-v5-vel}. Diodicity values for each case is tabulated in table \ref{table:diodicity}.
+\newline
+As it can be seen by comparing the velocity profiles of forward (pictures on the left) and reverse flow (pictures on the right), in all the simulated cases velocity fields of forward and reverse flow are significantly different.
+\newline
+In the forward flow simulations, the fluid inside the Tesla microvalve is accelerated from the inlet to the outlet. Some of the fluid goes into the side channel when reaching the T-junction which contributes to the reduction in the diodicity.
+On the other hand, in the reverse flow simulations the fluid is again accelerated at the inlet but it is splitted in the main and side channel when reaching the Y junction. The main and side flows then continue until they reach the T-junction, when the side flow is re-injected in the main channel. This stage is very important in the evaluation of the diodicity of the valve, since when the side flow is injected in the main one, it contributes to obstacle the main flow and increase the pressure drop between the inlet and the outlet of the valve.
+Since the diodicity is defined as the ratio between the pressure drop of the reverse flow over the pressure drop of the forward flow, when the reverse pressure drop increases, the diodicity increases too.
 
-\begin{figure}[!h]
-	\centering
-	\subfigure[\label{fig:designA-v3}]
-	{\includegraphics[angle=0,width=0.45\linewidth]{designA-v3.png}}
-	\subfigure[\label{fig:designA-reverse-v3}]
-	{\includegraphics[angle=0,width=0.45\linewidth]{designA-reverse-v3.png}}
-	\caption{Velocity results for design A with $U=0.3 m/s$ with forward flow (a) and reverse flow (b).}
-	\label{fig:designA-v3-vel}
-\end{figure}
+\subsection{Diodicity versus inlet velocity}
+The effect of the inlet velocity on the diodicity is visible in table \ref{table:diodicity}. As it can be seen by comparing the results at the three different inlet velocities taken into account in the simulation, the diodicity of the same Tesla valve increases with the inlet velocity.
+\newline
+This effect can be explained by comparing the different behavior of the reverse flow at different inlet velocities.
+In the case of reverse flow, the flow is splitted in the side and main channel when reaching the Y-junction. 
+At inlet velocity $0.3 m/s$, we can see the the flow is splitted equally in the side and main channel.
+When the inlet velocity increases ($1.5 m/s$ and $5.0 m/s$), more fluid is drained into the side channel with respect to the main channel; in this condition, when the side flow is re-injected in the main channel, it opposes to the main flow with the effect of increasing the pressure drop. By definition of the diodicity \ref{eq:diodicity}, the increase in the reverse pressure drop causes an increase in the diodicity value.
 
-\begin{figure}[!h]
-	\centering
-	\subfigure[\label{fig:designA-v15}]
-	{\includegraphics[angle=0,width=0.49\linewidth]{designA-v15.png}}
-	\subfigure[\label{fig:designA-reverse-v15}]
-	{\includegraphics[angle=0,width=0.5\linewidth]{designA-reverse-v15.png}}
-	\caption{Velocity results for design A with $U=1.5 m/s$ with forward flow (a) and reverse flow (b).}
-	\label{fig:designA-v15-vel}
-\end{figure}
-
-\begin{figure}[!h]
-	\centering
-	\subfigure[\label{fig:designA-v5}]
-	{\includegraphics[angle=0,width=0.49\linewidth]{designA-v5.png}}
-	\subfigure[\label{fig:designA-reverse-v5}]
-	{\includegraphics[angle=0,width=0.5\linewidth]{designA-reverse-v5.png}}
-	\caption{Velocity results for design A with $U=5 m/s$ with forward flow (a) and reverse flow (b).}
-	\label{fig:designA-v5-vel}
-\end{figure}
-
-\begin{figure}[!h]
-	\centering
-	\subfigure[\label{fig:designB-v3}]
-	{\includegraphics[angle=0,width=0.49\linewidth]{designB-v3.png}}
-	\subfigure[\label{fig:designB-reverse-v3}]
-	{\includegraphics[angle=0,width=0.5\linewidth]{designB-reverse-v3.png}}
-	\caption{Velocity results for design B with $U=0.3 m/s$ with forward flow (a) and reverse flow (b).}
-	\label{fig:designB-v3-vel}
-\end{figure}
-
-\begin{figure}[!h]
-	\centering
-	\subfigure[\label{fig:designB-v15}]
-	{\includegraphics[angle=0,width=0.49\linewidth]{designB-v15.png}}
-	\subfigure[\label{fig:designB-reverse-v15}]
-	{\includegraphics[angle=0,width=0.5\linewidth]{designB-reverse-v15.png}}
-	\caption{Velocity results for design B with $U=1.5 m/s$ with forward flow (a) and reverse flow (b).}
-	\label{fig:designB-v15-vel}
-\end{figure}
-
-\begin{figure}[!h]
-	\centering
-	\subfigure[\label{fig:designB-v5}]
-	{\includegraphics[angle=0,width=0.49\linewidth]{designB-v5.png}}
-	\subfigure[\label{fig:designB-reverse-v5}]
-	{\includegraphics[angle=0,width=0.5\linewidth]{designB-reverse-v5.png}}
-	\caption{Velocity results for design B with $U=5 m/s$ with forward flow (a) and reverse flow (b).}
-	\label{fig:designB-v5-vel}
-\end{figure}
+\subsection{Diodicity versus valve geometry}
+When the geometry of the Tesla valve is modified, this has an important effect on the diodicity too. As one can imagine, when the angle of the T-junction, defined as BETA in figure \ref{fig:tesla-geometry}, is increased from the value $8.53°$ of Design A to $71.1°$ of Design B, the side flow is expected to be more opposed to the main flow causing higher reverse pressure drops in Design B with respect to Design A. However, as reported in table \ref{table:diodicity}, the authors found that the diodicity values are the same in the case of inlet velocity $0.3 m/s$, while they are even lower in the case of Design B with respect to Design A. This effect can be explained by the presence of flaws in the model implemented in the simulation, such as the absence of effects important when studying the flow in micro channels, or in the design that should be studied by evaluating the diodicity in other tesla valves.
 
 
-\begin{table}[!h]
+\begin{table}[!ht]
 	\centering
 	\caption{Diodicity values for designs A and B at different inlet velocities.}
 	\begin{tabular}{c c c c}
@@ -331,26 +284,89 @@ The velocity profiles at steady state are shown in figures \ref{fig:designA-v3-v
 		Design B & 1.0079 & 1.1429     & 1.3440      \\
 		\specialrule{.1em}{.05em}{.05em}
 	\end{tabular}
-	\label{table:diodicty}
+	\label{table:diodicity}
 \end{table}
 
-\textcolor{red}{\textbf{\textsc{ADD DISCUSSION}}}
+\begin{figure}[!ht]
+	\begin{centering}
+		\includegraphics[angle=0,width=0.8\linewidth]{diodicity_chart.png}
+		\par\end{centering}
+	\caption{Diodicity values of Design A and Design B Tesla Valves at different inlet velocities.}
+	\label{fig:diodicity_chart}
+\end{figure}
 
+\begin{figure}[!ht]
+	\centering
+	\subfigure[\label{fig:designA-v3}]
+	{\includegraphics[angle=0,width=0.45\linewidth]{designA-v3.png}}
+	\subfigure[\label{fig:designA-reverse-v3}]
+	{\includegraphics[angle=0,width=0.45\linewidth]{designA-reverse-v3.png}}
+	\caption{Velocity results for design A with $U=0.3 m/s$ with forward flow (a) and reverse flow (b).}
+	\label{fig:designA-v3-vel}
+\end{figure}
+
+\begin{figure}[!ht]
+	\centering
+	\subfigure[\label{fig:designA-v15}]
+	{\includegraphics[angle=0,width=0.49\linewidth]{designA-v15.png}}
+	\subfigure[\label{fig:designA-reverse-v15}]
+	{\includegraphics[angle=0,width=0.5\linewidth]{designA-reverse-v15.png}}
+	\caption{Velocity results for design A with $U=1.5 m/s$ with forward flow (a) and reverse flow (b).}
+	\label{fig:designA-v15-vel}
+\end{figure}
+
+\begin{figure}[!ht]
+	\centering
+	\subfigure[\label{fig:designA-v5}]
+	{\includegraphics[angle=0,width=0.49\linewidth]{designA-v5.png}}
+	\subfigure[\label{fig:designA-reverse-v5}]
+	{\includegraphics[angle=0,width=0.5\linewidth]{designA-reverse-v5.png}}
+	\caption{Velocity results for design A with $U=5 m/s$ with forward flow (a) and reverse flow (b).}
+	\label{fig:designA-v5-vel}
+\end{figure}
+
+\begin{figure}[!ht]
+	\centering
+	\subfigure[\label{fig:designB-v3}]
+	{\includegraphics[angle=0,width=0.49\linewidth]{designB-v3.png}}
+	\subfigure[\label{fig:designB-reverse-v3}]
+	{\includegraphics[angle=0,width=0.5\linewidth]{designB-reverse-v3.png}}
+	\caption{Velocity results for design B with $U=0.3 m/s$ with forward flow (a) and reverse flow (b).}
+	\label{fig:designB-v3-vel}
+\end{figure}
+
+\begin{figure}[!ht]
+	\centering
+	\subfigure[\label{fig:designB-v15}]
+	{\includegraphics[angle=0,width=0.49\linewidth]{designB-v15.png}}
+	\subfigure[\label{fig:designB-reverse-v15}]
+	{\includegraphics[angle=0,width=0.5\linewidth]{designB-reverse-v15.png}}
+	\caption{Velocity results for design B with $U=1.5 m/s$ with forward flow (a) and reverse flow (b).}
+	\label{fig:designB-v15-vel}
+\end{figure}
+
+\begin{figure}[!ht]
+	\centering
+	\subfigure[\label{fig:designB-v5}]
+	{\includegraphics[angle=0,width=0.49\linewidth]{designB-v5.png}}
+	\subfigure[\label{fig:designB-reverse-v5}]
+	{\includegraphics[angle=0,width=0.5\linewidth]{designB-reverse-v5.png}}
+	\caption{Velocity results for design B with $U=5 m/s$ with forward flow (a) and reverse flow (b).}
+	\label{fig:designB-v5-vel}
+\end{figure}
+
+\newpage
 %------------------------
 \section{Conclusions and Future Work}
-
-\textcolor{red}{\textbf{\textsc{ADD CONCLUSION}}}
-
-Authors believe a comprehensive sensitivity analysis on tesla valve design would be beneficial to understand how these parameters affect the diodicity. Moreover, at micro scales capillary forces become very important in characterizing the flow. The authors would like to investigate the effects of such forces.
+Authors believe a comprehensive sensitivity analysis on Tesla Valve design would be beneficial to understand how these parameters affect the diodicity. Moreover, at micro scales capillary forces become very important in characterizing the flow. The authors would like to investigate the effects of such forces.
 
 It would also be interesting to utilize Fenics' automated mesh refinement on this case to reduce simulation time.
-
 
 %-----------------------------------------------------------------------------------------------------------------
 \pagebreak[2]
 \begin{thebibliography}{99}
 	\bibitem{microvalve}
-	Kwang, Chong,emph{A review of microvalves}, J. Micromech. Microeng. $16$ $(2006)$
+	Kwang, Chong,\emph{A review of microvalves}, J. Micromech. Microeng. $16$ $(2006)$
 	\bibitem{actuator_valves}
 	Jin-Yuan Qian, Cong-Wei Hou, Xiao-Juan Li and Zhi-Jiang Jin, \emph{Actuation Mechanism of Microvalves: A Review}, Micromachines $2020$, $11$, $172$\bibitem{tesla_valve}
 	A. Y. Nobakht, M. Shahsavan, A. Paykani,
@@ -376,3 +392,4 @@ It would also be interesting to utilize Fenics' automated mesh refinement on thi
 \end{thebibliography}
 
 \end{document}
+
